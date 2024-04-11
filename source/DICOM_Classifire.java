@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 
-
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -24,8 +23,8 @@ import javax.swing.JOptionPane;
 public class DICOM_Classifire extends PlugInFrame {
 
 	// member variable
-	JTextField input_t = new JTextField(17);
-	JTextField output_t = new JTextField(17);
+	JTextField input_t = new JTextField(16);
+	JTextField output_t = new JTextField(16);
 	JTextField search_t = new JTextField();
 	JTextField min = new JTextField(4);
 	JTextField max = new JTextField(4);
@@ -45,7 +44,6 @@ public class DICOM_Classifire extends PlugInFrame {
 	DefaultListModel<String> advanced_model = new DefaultListModel<>();
 	JLabel statusLabel = new JLabel("Ready");
 	JProgressBar progressBar = new JProgressBar();
-	
 	JTabbedPane path_tab = new JTabbedPane();
 	
 	JComboBox dir_cb = new JComboBox();
@@ -150,6 +148,7 @@ public class DICOM_Classifire extends PlugInFrame {
 		JPanel dir_panel = new JPanel();
 		dir_panel.setLayout(new BoxLayout(dir_panel, BoxLayout.Y_AXIS));
 		path_tab.add("Directory", dir_panel);
+		path_tab.setForegroundAt(0, Color.BLACK);
 		JList dir_tagslist = new JList(dir_model);
 		// dir_tagslistをリストに追加
 		setall_tagsLists.add(dir_tagslist);
@@ -163,6 +162,7 @@ public class DICOM_Classifire extends PlugInFrame {
 		JPanel name_panel = new JPanel();
 		name_panel.setLayout(new BoxLayout(name_panel, BoxLayout.Y_AXIS));
 		path_tab.add("FileName", name_panel);
+		path_tab.setForegroundAt(1, Color.BLACK);
 		JList name_tagslist = new JList(name_model);
 		// name_tagslistをリストに追加
 		setall_tagsLists.add(name_tagslist);
@@ -188,6 +188,7 @@ public class DICOM_Classifire extends PlugInFrame {
 		JPanel range_panel = new JPanel();
 		range_panel.setLayout(new BoxLayout(range_panel, BoxLayout.Y_AXIS));
 		filter_tab.add("Range", range_panel);
+		filter_tab.setForegroundAt(0, Color.BLACK);
 		
 		JPanel rangeset_panel = new JPanel();
 		range_panel.add(rangeset_panel);
@@ -217,6 +218,7 @@ public class DICOM_Classifire extends PlugInFrame {
 		JPanel advanced_panel = new JPanel();
 		advanced_panel.setLayout(new BoxLayout(advanced_panel, BoxLayout.Y_AXIS));
 		filter_tab.add("Advanced", advanced_panel);
+		filter_tab.setForegroundAt(1, Color.BLACK);
 		JPanel advset_panel = new JPanel();
 		advanced_panel.add(advset_panel);
 		JButton adv_b = new JButton("Add");
@@ -230,7 +232,6 @@ public class DICOM_Classifire extends PlugInFrame {
 		advset_panel.add(element);
 		advset_panel.add(value);
 		advset_panel.add(adv_b);
-		
 		
 		JList advanced_list = new JList(advanced_model);
 		JScrollPane scroll_advanced_list = new JScrollPane(advanced_list);
@@ -277,7 +278,6 @@ public class DICOM_Classifire extends PlugInFrame {
 		panelBase.add(main_panel);
 	    // GUIにステータスバーとプログレスバーを追加
 	    panelBase.add(buttomPanel, BorderLayout.SOUTH);
-
 	    
 	    // バックスペースで要素を削除するキーリスナー
 	    KeyListener listKeyListener = new KeyAdapter() {
@@ -695,7 +695,6 @@ public class DICOM_Classifire extends PlugInFrame {
 	    return conditionMet;
 	}
 
-	
 	// Process DICOM File Method
 	private void processDICOMFile(String filePath, String outputFolderPath, List<String> dirItems, List<String> nameItems, int totalFiles, int i) {
 	    String subDir = outputFolderPath;
@@ -777,7 +776,6 @@ public class DICOM_Classifire extends PlugInFrame {
 	        handleUserChoice(orifilePath, newfilePath, totalFiles, i);
 	    }
 	}
-
 	
 	private String getNewFileName(Path filePath) {
 	    String fileName = filePath.getFileName().toString();
