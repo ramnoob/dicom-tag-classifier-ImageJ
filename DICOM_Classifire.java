@@ -33,7 +33,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	JTextField group = new JTextField(4);
 	JTextField element = new JTextField(4);
 	JTextField value = new JTextField(4);
-	// 他�?�メンバ�?�変数と同じレベルでuniqueTagsを宣�?
+	// 他のメンバー変数と同じレベルでuniqueTagsを宣言
 	List<String> dicomFilePaths = new ArrayList<>();
 	List<String> uniqueTags = new ArrayList<>();
 	List<JList> setall_tagsLists = new ArrayList<>();
@@ -100,7 +100,7 @@ public class DICOM_Classifire extends PlugInFrame {
 		main_panel.add(tag_panel);
 		tag_panel.setLayout(new BoxLayout(tag_panel, BoxLayout.Y_AXIS));
 		tagslist = new JList(taglist_model);
-		//�?ブルクリ�?クで追�?
+		//ダブルクリックで追加
 		tagslist.addMouseListener(new MouseAdapter() {
 		    public void mouseClicked(MouseEvent e) {
 		        if (e.getClickCount() == 2) {
@@ -121,14 +121,14 @@ public class DICOM_Classifire extends PlugInFrame {
 		tag_panel.add(scroll_tagslist);
 		search_t.setPreferredSize(new Dimension(190, 20));
 		tag_panel.add(search_t);
-		// 検索�?キストフィールドにKeyListenerを追�?
+		// 検索テキストフィールドにKeyListenerを追加
 		search_t.addKeyListener(new KeyListener() {
 			public void keyTyped(KeyEvent e) {
 			}
 			public void keyPressed(KeyEvent e) {
 			}
 			public void keyReleased(KeyEvent e) {
-				searchTagsList(taglist_model, uniqueTags); // 検索メソ�?ドを呼び出�?
+				searchTagsList(taglist_model, uniqueTags); // 検索メソッドを呼び出す
 			}
 		});
 		
@@ -151,7 +151,7 @@ public class DICOM_Classifire extends PlugInFrame {
 		dir_panel.setLayout(new BoxLayout(dir_panel, BoxLayout.Y_AXIS));
 		path_tab.add("Directory", dir_panel);
 		JList dir_tagslist = new JList(dir_model);
-		// dir_tagslistをリストに追�?
+		// dir_tagslistをリストに追加
 		setall_tagsLists.add(dir_tagslist);
 		JScrollPane scroll_dir_tagslist = new JScrollPane(dir_tagslist);
 		scroll_dir_tagslist.setPreferredSize(new Dimension(190, 190));
@@ -164,7 +164,7 @@ public class DICOM_Classifire extends PlugInFrame {
 		name_panel.setLayout(new BoxLayout(name_panel, BoxLayout.Y_AXIS));
 		path_tab.add("FileName", name_panel);
 		JList name_tagslist = new JList(name_model);
-		// name_tagslistをリストに追�?
+		// name_tagslistをリストに追加
 		setall_tagsLists.add(name_tagslist);
 		JScrollPane scroll_name_tagslist = new JScrollPane(name_tagslist);
 		scroll_name_tagslist.setPreferredSize(new Dimension(190, 190));
@@ -244,29 +244,29 @@ public class DICOM_Classifire extends PlugInFrame {
 		
 		JButton start_b = new JButton("Start");
 		start_b.setPreferredSize(new Dimension(80, 30));
-		// start_b ボタンが押されたとき�?�処�?
+		// start_b ボタンが押されたときの処理
 		start_b.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
-		        // output_t が未�?定�?�場合にス�?ータスバ�?�にメ�?セージを表示
+		        // output_t が未指定の場合にステータスバーにメッセージを表示
 		        if (output_t.getText().isEmpty()) {
 		            setStatusText("Output directory is not specified.");
-		            return; // 処�?を終�?
+		            return; // 処理を終了
 		        }
 		        
-		        // ここから classifyImages() メソ�?ド�?�呼び出しやそ�?�他�?�処�?を実�?
-		        classifyImages(); // 例として classifyImages() メソ�?ドを呼び出�?
+		        // ここから classifyImages() メソッドの呼び出しやその他の処理を実行
+		        classifyImages(); // 例として classifyImages() メソッドを呼び出す
 		    }
 		});
 		
-	    // ス�?ータスバ�?�の設�?
+	    // ステータスバーの設定
 		JPanel buttomPanel = new JPanel();
 		//JPanel statasPanel = new JPanel();
 		statusLabel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		statusLabel.setPreferredSize(new Dimension(375, 25));
 		statusLabel.setBorder(new TitledBorder(border));
 
-	    // プログレスバ�?�の設�?
-	    progressBar.setStringPainted(true); // パ�?�セン�?ージ表示を有効にする
+	    // プログレスバーの設定
+	    progressBar.setStringPainted(true); // パーセンテージ表示を有効にする
 		buttomPanel.add(statusLabel);
 	    buttomPanel.add(progressBar);
 		buttomPanel.add(start_b);
@@ -275,11 +275,11 @@ public class DICOM_Classifire extends PlugInFrame {
 		panelBase.setLayout(new BoxLayout(panelBase, BoxLayout.Y_AXIS));
 		panelBase.add(io_panel);
 		panelBase.add(main_panel);
-	    // GUIにス�?ータスバ�?�とプログレスバ�?�を追�?
+	    // GUIにステータスバーとプログレスバーを追加
 	    panelBase.add(buttomPanel, BorderLayout.SOUTH);
 
 	    
-	    // バックスペ�?�スで要�?を削除するキーリスナ�?�
+	    // バックスペースで要素を削除するキーリスナー
 	    KeyListener listKeyListener = new KeyAdapter() {
 	        @Override
 	        public void keyPressed(KeyEvent e) {
@@ -294,7 +294,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	        }
 	    };
 
-	    // �? JList にキーリスナ�?�を追�?
+	    // 各 JList にキーリスナーを追加
 	    dir_tagslist.addKeyListener(listKeyListener);
 	    name_tagslist.addKeyListener(listKeyListener);
 	    range_list.addKeyListener(listKeyListener);
@@ -304,35 +304,35 @@ public class DICOM_Classifire extends PlugInFrame {
 		setVisible(true);
 	}
 	
-	// ス�?ータスバ�?�の�?キストを更新するメソ�?�?
+	// ステータスバーのテキストを更新するメソッド
 	private void setStatusText(String text) {
 	    statusLabel.setText(text);
-	    statusLabel.paintImmediately(statusLabel.getVisibleRect()); // UIスレ�?ドで即座に更新
+	    statusLabel.paintImmediately(statusLabel.getVisibleRect()); // UIスレッドで即座に更新
 	}
 
-	// プログレスバ�?�の値を更新するメソ�?�?
+	// プログレスバーの値を更新するメソッド
 	private void setProgressValue(int value) {
 	    progressBar.setValue(value);
-	    progressBar.paintImmediately(progressBar.getVisibleRect()); // UIスレ�?ドで即座に更新
+	    progressBar.paintImmediately(progressBar.getVisibleRect()); // UIスレッドで即座に更新
 	}
 	
 	public static String getformatInfo(String filePath) {
-        DICOM dicom = new DICOM(); // DICOMクラスのインスタンスを作�??
+        DICOM dicom = new DICOM(); // DICOMクラスのインスタンスを作成
         String predcminfo = dicom.getInfo(filePath);
         
         List<String> list = new ArrayList<>();
-        String lastDicomTag = null; // �?後に出現したDICOMタグ形式�?�行を保持する変数
+        String lastDicomTag = null; // 最後に出現したDICOMタグ形式の行を保持する変数
 
-        // �?字�?�を改行で区�?ってリストに追�?
+        // 文字列を改行で区切ってリストに追加
         String[] lines = predcminfo.split("\n");
         for (String line : lines) {
-            // DICOMタグ形式かど�?かを判�?
+            // DICOMタグ形式かどうかを判定
             if (line.matches("^\\w{4},\\w{4}.*")) {
-                // DICOMタグ形式�?�行�?�場合�?�そのままリストに追�?し�?�最後�?�DICOMタグを更新
+                // DICOMタグ形式の行の場合、そのままリストに追加し、最後のDICOMタグを更新
                 list.add(line);
                 lastDicomTag = line;
             } else {
-                // DICOMタグ形式でな�?行�?�場合�?�直前�?�DICOMタグ形式�?�行�?�値の�?後に追�?
+                // DICOMタグ形式でない行の場合、直前のDICOMタグ形式の行の値の最後に追加
                 if (lastDicomTag != null) {
                     int lastIndex = list.size() - 1;
                     String lastDicomTagValue = list.get(lastIndex);
@@ -341,28 +341,28 @@ public class DICOM_Classifire extends PlugInFrame {
             }
         }
 
-        // 改行を含�?要�?を削除
+        // 改行を含む要素を削除
         for (int i = 0; i < list.size(); i++) {
             String line = list.get(i);
             if (line.contains("\n")) {
-                // 改行を含�?場合�?�改行を削除して要�?を更新
+                // 改行を含む場合、改行を削除して要素を更新
                 list.set(i, line.replace("\n", ""));
             }
         }
         
-        // LinkedHashSetを使用して重�?する要�?を�?つにまとめる
+        // LinkedHashSetを使用して重複する要素を一つにまとめる
         list = new ArrayList<>(new LinkedHashSet<>(list));
         
-        // リスト�?��?容を文字�?�に変換
+        // リストの内容を文字列に変換
         String dcmInfo = String.join("\n", list);
         
         return dcmInfo;
 	}
 	
 	public static String getformatTag(String filePath, String dcm_tag) {
-	    String dcmInfo = getformatInfo(filePath); // DICOM �?報を取�?
+	    String dcmInfo = getformatInfo(filePath); // DICOM 情報を取得
 
-	    // ": " の後が空白か�?�のな�?行を削除
+	    // ": " の後が空白か値のない行を削除
 	    List<String> list = new ArrayList<>();
 	    String[] lines = dcmInfo.split("\n");
 	    for (String line : lines) {
@@ -373,7 +373,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	        list.add(line);
 	    }
 
-	    // DICOM タグの値を取�?
+	    // DICOM タグの値を取得
 	    String tagValue = "None";
 	    for (String line : list) {
 	        if (line.startsWith(dcm_tag)) {
@@ -394,7 +394,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	    String inputDir = IJ.getDirectory("Input directory");
 	    input_t.setText(inputDir);
 	    
-	    // SwingWorkerを使用してfindDICOMFilesInDirectoryメソ�?ドを別のスレ�?ドで実行す�?
+	    // SwingWorkerを使用してfindDICOMFilesInDirectoryメソッドを別のスレッドで実行する
 	    SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
 	        @Override
 	        protected Void doInBackground() throws Exception {
@@ -405,26 +405,26 @@ public class DICOM_Classifire extends PlugInFrame {
 	        
 	        @Override
 	        protected void done() {
-	            // タスクが完�?した後に実行する�?��?を記述する
-	            // リスト�?�コピ�?�を作�?�し、それをシャ�?フルする
+	            // タスクが完了した後に実行する処理を記述する
+	            // リストのコピーを作成し、それをシャッフルする
 	            List<String> shuffled_path = new ArrayList<>(dicomFilePaths);
 	            Collections.shuffle(shuffled_path);
-	            // uniqueTagsをクリアしてからタグを追�?する
+	            // uniqueTagsをクリアしてからタグを追加する
 	            uniqueTags.clear();
 	            for (int i = 0; i < Math.min(shuffled_path.size(), 3); i++) {
 	                String file_path = shuffled_path.get(i);
 	                addUniqueTags(file_path, uniqueTags);
 	            }
-	            // JList にタグを設�?
+	            // JList にタグを設定
 	            taglist_model.clear(); // タグリストをクリア
 	            for (String tag : uniqueTags) {
 	                taglist_model.addElement(tag);
 	            }
-	            setStatusText("Found " + dicomFilePaths.size() + " DICOM files."); // 追�?
+	            setStatusText("Found " + dicomFilePaths.size() + " DICOM files."); // 追加
 	        }
 	    };
 	    
-	    // SwingWorkerを実行す�?
+	    // SwingWorkerを実行する
 	    worker.execute();
 	}
 
@@ -458,14 +458,14 @@ public class DICOM_Classifire extends PlugInFrame {
 				}
 			}
 		}
-		setStatusText("Found " + dicomFilePaths.size() + " DICOM files."); // 追�?
+		setStatusText("Found " + dicomFilePaths.size() + " DICOM files."); // 追加
 	}
 
 	private void addUniqueTags(String filePath, List<String> uniqueTags) {
-	    String dcminfo = getformatInfo(filePath); // DICOM�?報を取�?
-	    String[] lines = dcminfo.split("\n"); // DICOM�?報を行に�?割
+	    String dcminfo = getformatInfo(filePath); // DICOM情報を取得
+	    String[] lines = dcminfo.split("\n"); // DICOM情報を行に分割
 
-	    // �?行か�? ":" までの部�?を取得し�?重�?しな�?タグをリストに追�?
+	    // 各行から ":" までの部分を取得し、重複しないタグをリストに追加
 	    for (String line : lines) {
 	        int colonIndex = line.indexOf(":");
 	        if (colonIndex != -1) {
@@ -478,29 +478,29 @@ public class DICOM_Classifire extends PlugInFrame {
 	}
 	
 	public void searchTagsList(DefaultListModel<String> taglist_model, List<String> uniqueTags) {
-		List<String> allTags = new ArrayList<>(uniqueTags); // uniqueTagsのコピ�?�を作�??
-		// フィルター�?キストを整形して、大�?字と小文字�?�違いを無視す�?
+		List<String> allTags = new ArrayList<>(uniqueTags); // uniqueTagsのコピーを作成
+		// フィルターテキストを整形して、大文字と小文字の違いを無視する
 		String searach = search_t.getText();
 		searach = searach.toLowerCase().replace(" ", "").replace(",", "").replace(":", "");
 		// 列挙されたタグをフィルタリングする
 		taglist_model.clear(); // 列挙されたタグリストをクリア
 		for (String tag : allTags) {
-			// タグの�?字�?�を整形して、大�?字と小文字�?�違いを無視して検索する
+			// タグの文字列を整形して、大文字と小文字の違いを無視して検索する
 			String formattedTag = tag.toLowerCase().replaceAll("[ ,:]", "");
 			if (formattedTag.contains(searach)) {
-				taglist_model.addElement(tag); // フィルター�?キストにマッチするタグをリストに追�?
+				taglist_model.addElement(tag); // フィルターテキストにマッチするタグをリストに追加
 			}
 		}
 	}
 
 	public void addSelectedItemToActiveList(DefaultListModel<String> tagListModel, JTabbedPane tabbedPane) {
-	    // 選択されたアイ�?�?を取�?
+	    // 選択されたアイテムを取得
 	    List<String> selectedItems = tagslist.getSelectedValuesList();
-	    // アク�?ィブなタブ�?�イン�?�?クスを取�?
+	    // アクティブなタブのインデックスを取得
 	    int selectedIndex = tabbedPane.getSelectedIndex();
-	    // 選択されたタブに対応するJListを取�?
+	    // 選択されたタブに対応するJListを取得
 	    JList<String> activeList = setall_tagsLists.get(selectedIndex);
-	    // タブが0番目の場合�?�処�?
+	    // タブが0番目の場合の処理
 	    if (selectedIndex == 0) {
 	        for (String selectedItem : selectedItems) {
 	            dir_model.addElement(selectedItem);
@@ -522,7 +522,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	        double minValue = Double.parseDouble(minText);
 	        double maxValue = Double.parseDouble(maxText);
 	        
-	        // マイナス値が�?�力されて�?る�?�合�?�minとmaxの大小関係を正しく表記し直�?
+	        // マイナス値が入力されている場合、minとmaxの大小関係を正しく表記し直す
 	        double correctedMinValue = Math.min(minValue, maxValue);
 	        double correctedMaxValue = Math.max(minValue, maxValue);
 	        
@@ -547,7 +547,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	    }
 	}
 	
-    // 他�?�メソ�?ドと同じように、get_tag_valuesメソ�?ドを定義します�??
+    // 他のメソッドと同じように、get_tag_valuesメソッドを定義します。
     private List<String> getpathlistItems(DefaultListModel<String> model) {
         List<String> listitems = new ArrayList<>();
         List<String> tagitems = new ArrayList<>();
@@ -571,7 +571,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	    List<String> dir_listItems = getpathlistItems(dir_model);
 	    List<String> name_listItems = getpathlistItems(name_model);
 	    
-	    // �?類用パスを保存するため�?�新しいリス�?
+	    // 分類用パスを保存するための新しいリスト
 	    List<String> classifyFiles = new ArrayList<>(dicomFilePaths);
 	    
 	    int totalFiles = classifyFiles.size();
@@ -593,7 +593,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	        	
 	        }else {
 	        	IJ.showMessage("Error", "No DICOM files found. Check the filtering conditions.");
-	        	return; // エラーメ�?セージを表示して処�?を終�?
+	        	return; // エラーメッセージを表示して処理を終了
 	        }
 	    };
 	    
@@ -614,7 +614,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	        }else {
 	        	IJ.showMessage("Error", "No DICOM files found. Check the filtering conditions.");
 	        	return;
-	        	} // エラーメ�?セージを表示して処�?を終�?
+	        	} // エラーメッセージを表示して処理を終了
 	        
 	    };
 	        
@@ -624,11 +624,11 @@ public class DICOM_Classifire extends PlugInFrame {
 	        
 	        // Check if the process should be canceled after each iteration
 	        if (cancelRequested) {
-	            break; // キャンセルが要求された場合�?�ループを抜け�?
+	            break; // キャンセルが要求された場合、ループを抜ける
 	        }
 	        
 	    }
-	    // 処�?完�?時�?�メ�?セージを表示
+	    // 処理完了時のメッセージを表示
         if (!cancelRequested) {
     	    setStatusText("Classification complete.");
         }
@@ -637,7 +637,7 @@ public class DICOM_Classifire extends PlugInFrame {
 
 	private boolean isWithinRange(String filePath, Object filterType) {
 	        
-	        // フィルタのタイプに応じて DICOM タグのキーを設定す�?
+	        // フィルタのタイプに応じて DICOM タグのキーを設定する
 	        String tagKey = null;
 	        if (filterType.equals("Image Number")) {
 	            tagKey = "0020,0013";
@@ -645,10 +645,10 @@ public class DICOM_Classifire extends PlugInFrame {
 	            tagKey = "0020,1041";
 	        }
 	        
-	        // DICOM タグの値を取得す�?
+	        // DICOM タグの値を取得する
         	double filteredValue = Double.parseDouble(getformatTag(filePath, tagKey));
 
-	        // �?定された�?囲�?に DICOM タグの値があるかど�?かをチェ�?クする
+	        // 指定された範囲内に DICOM タグの値があるかどうかをチェックする
 	        for (int i = 0; i < range_model.size(); i++) {
 	            String rangeText = range_model.getElementAt(i);
 	            double minValue = Double.parseDouble(rangeText.split(" ~ ")[0]);
@@ -671,11 +671,11 @@ public class DICOM_Classifire extends PlugInFrame {
 	        String elementValue = parts[0].split(",")[1];
 	        String valueValue = parts[1].toLowerCase().replaceAll(" ", "");
 	        String tagValue= String.format("%s,%s", groupValue, elementValue);
-	        // DICOMタグの値を取�?
+	        // DICOMタグの値を取得
 	        String filteredTag = getformatTag(filePath, tagValue).toLowerCase().replaceAll(" ", "").replaceAll("\r\n", "").trim();
-	        // タグの値とフィルターの値を比�?し�?��?致するかど�?かをチェ�?ク
+	        // タグの値とフィルターの値を比較し、一致するかどうかをチェック
 	        if (filterType.equals("And")) {
-	            // すべてのタグと�?致するかを確�?
+	            // すべてのタグと一致するかを確認
 	            if (filteredTag.equals(valueValue)) {
 	            	conditionMet = true;
 	            } else {
@@ -683,7 +683,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	                break;
 	            }
 	        } else if (filterType.equals("Or")) {
-	            // �?ずれか�?�タグが�?致するかを確�?
+	            // いずれかのタグが一致するかを確認
 	            if (filteredTag.equals(valueValue)) {
 	            	conditionMet = true;
 	                break;
@@ -785,7 +785,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	    String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
 	    int counter = 1;
 
-	    // ファイル名�?�末尾に "_1", "_2", "_3" などを付けて�?�?
+	    // ファイル名の末尾に "_1", "_2", "_3" などを付けていく
 	    String newFileName = fileNameWithoutExtension + "_" + counter + "." + fileExtension;
 	    while (Files.exists(filePath.resolveSibling(newFileName))) {
 	        counter++;
@@ -794,7 +794,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	    return newFileName;
 	}
 
-	// ファイルのコピ�?�を行うメソ�?�?
+	// ファイルのコピーを行うメソッド
 	private void copyFile(Path orifilePath, Path newfilePath) {
 	    try {
 	        Files.copy(orifilePath, newfilePath, StandardCopyOption.REPLACE_EXISTING);
@@ -803,7 +803,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	    }
 	}
 
-	// ポップア�?プダイアログを表示してユーザーの選択を処�?するメソ�?�?
+	// ポップアップダイアログを表示してユーザーの選択を処理するメソッド
 	private void handleUserChoice(Path orifilePath, Path newfilePath, int totalFiles, int i) {
 	    // Check if the file already exists and popup is not shown yet
 	    if (Files.exists(newfilePath) && !popup_shown) {
@@ -828,14 +828,14 @@ public class DICOM_Classifire extends PlugInFrame {
 		        //setProgressValue(0);
 		        setStatusText("canceled");
 		        try {
-		            // 2秒�?つ
+		            // 2秒待つ
 		            Thread.sleep(2000);
 		        } catch (InterruptedException e) {
 		            e.printStackTrace();
 		        }
 		        setProgressValue(0);
 		        setStatusText("Ready.");
-	            return; // キャンセルが選ばれた場合�?�後続�?�処�?を停止
+	            return; // キャンセルが選ばれた場合、後続の処理を停止
 	        }
 	    }
 
