@@ -20,8 +20,8 @@ DICOM Tag Classifier is a plugin created in Java code that provides a convenient
 6. **Monitor**: Monitor the progress of the classification process and view any error or warning messages within ImageJ.
 
 ## Dependencies
-- **ImageJ**: Java-based image processing software. This plug-in supports the **Windows version**; the MacOS version currently has a flawed GUI.
-- **Fiji**: A distribution that adds plug-ins and features to ImageJ, often used for scientific image analysis; supports both **Windows and MacOS versions**.
+- **ImageJ**: Java-based image processing software.
+- **Fiji**: A distribution that adds plug-ins and features to ImageJ, often used for scientific image analysis.
 
 ## License
 This plugin is licensed under the [MIT License](LICENSE).
