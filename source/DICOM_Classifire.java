@@ -26,13 +26,12 @@ public class DICOM_Classifire extends PlugInFrame {
 	JTextField input_t = new JTextField(16);
 	JTextField output_t = new JTextField(16);
 	JTextField search_t = new JTextField();
-	JTextField min = new JTextField(4);
-	JTextField max = new JTextField(4);
+	JTextField min = new JTextField(3);
+	JTextField max = new JTextField(3);
 	JTextField memo = new JTextField(4);
-	JTextField group = new JTextField(4);
-	JTextField element = new JTextField(4);
+	JTextField group = new JTextField(3);
+	JTextField element = new JTextField(3);
 	JTextField value = new JTextField(4);
-	// 他のメンバー変数と同じレベルでuniqueTagsを宣言
 	List<String> dicomFilePaths = new ArrayList<>();
 	List<String> uniqueTags = new ArrayList<>();
 	List<JList> setall_tagsLists = new ArrayList<>();
@@ -45,7 +44,6 @@ public class DICOM_Classifire extends PlugInFrame {
 	JLabel statusLabel = new JLabel("Ready");
 	JProgressBar progressBar = new JProgressBar();
 	JTabbedPane path_tab = new JTabbedPane();
-	
 	JComboBox dir_cb = new JComboBox();
 	JComboBox name_cb = new JComboBox();
 	JComboBox range_cb = new JComboBox();
@@ -56,7 +54,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	private boolean cancelRequested = false;
 	
 	public DICOM_Classifire() {
-
+		
 		super("DICOM Classifire");
 		setSize(650, 450);
 		EtchedBorder border =new EtchedBorder(EtchedBorder.LOWERED);
@@ -98,7 +96,7 @@ public class DICOM_Classifire extends PlugInFrame {
 		main_panel.add(tag_panel);
 		tag_panel.setLayout(new BoxLayout(tag_panel, BoxLayout.Y_AXIS));
 		tagslist = new JList(taglist_model);
-		//ダブルクリックで追加
+		// Double-click to add
 		tagslist.addMouseListener(new MouseAdapter() {
 		    public void mouseClicked(MouseEvent e) {
 		        if (e.getClickCount() == 2) {
@@ -119,14 +117,14 @@ public class DICOM_Classifire extends PlugInFrame {
 		tag_panel.add(scroll_tagslist);
 		search_t.setPreferredSize(new Dimension(190, 20));
 		tag_panel.add(search_t);
-		// 検索テキストフィールドにKeyListenerを追加
+		// Add KeyListener to search text field
 		search_t.addKeyListener(new KeyListener() {
 			public void keyTyped(KeyEvent e) {
 			}
 			public void keyPressed(KeyEvent e) {
 			}
 			public void keyReleased(KeyEvent e) {
-				searchTagsList(taglist_model, uniqueTags); // 検索メソッドを呼び出す
+				searchTagsList(taglist_model, uniqueTags); // Call the search method
 			}
 		});
 		
@@ -150,7 +148,7 @@ public class DICOM_Classifire extends PlugInFrame {
 		path_tab.add("Directory", dir_panel);
 		path_tab.setForegroundAt(0, Color.BLACK);
 		JList dir_tagslist = new JList(dir_model);
-		// dir_tagslistをリストに追加
+		// Add dir_tagslist to the list
 		setall_tagsLists.add(dir_tagslist);
 		JScrollPane scroll_dir_tagslist = new JScrollPane(dir_tagslist);
 		scroll_dir_tagslist.setPreferredSize(new Dimension(190, 190));
@@ -164,7 +162,7 @@ public class DICOM_Classifire extends PlugInFrame {
 		path_tab.add("FileName", name_panel);
 		path_tab.setForegroundAt(1, Color.BLACK);
 		JList name_tagslist = new JList(name_model);
-		// name_tagslistをリストに追加
+		// Add name_tagslist to list
 		setall_tagsLists.add(name_tagslist);
 		JScrollPane scroll_name_tagslist = new JScrollPane(name_tagslist);
 		scroll_name_tagslist.setPreferredSize(new Dimension(190, 190));
@@ -245,29 +243,28 @@ public class DICOM_Classifire extends PlugInFrame {
 		
 		JButton start_b = new JButton("Start");
 		start_b.setPreferredSize(new Dimension(80, 30));
-		// start_b ボタンが押されたときの処理
+		// Processing when the start_b button is pressed
 		start_b.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
-		        // output_t が未指定の場合にステータスバーにメッセージを表示
+		        // Display a message in the status bar when output_t is unspecified
 		        if (output_t.getText().isEmpty()) {
 		            setStatusText("Output directory is not specified.");
-		            return; // 処理を終了
+		            return; // End of process
 		        }
-		        
-		        // ここから classifyImages() メソッドの呼び出しやその他の処理を実行
-		        classifyImages(); // 例として classifyImages() メソッドを呼び出す
+		        // From here, call the classifyImages() method and perform other processing
+		        classifyImages();
 		    }
 		});
 		
-	    // ステータスバーの設定
+	    // Status Bar Settings
 		JPanel buttomPanel = new JPanel();
 		//JPanel statasPanel = new JPanel();
 		statusLabel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		statusLabel.setPreferredSize(new Dimension(375, 25));
 		statusLabel.setBorder(new TitledBorder(border));
 
-	    // プログレスバーの設定
-	    progressBar.setStringPainted(true); // パーセンテージ表示を有効にする
+	    // Setting up the progress bar
+	    progressBar.setStringPainted(true); // Enable percentage display
 		buttomPanel.add(statusLabel);
 	    buttomPanel.add(progressBar);
 		buttomPanel.add(start_b);
@@ -276,10 +273,10 @@ public class DICOM_Classifire extends PlugInFrame {
 		panelBase.setLayout(new BoxLayout(panelBase, BoxLayout.Y_AXIS));
 		panelBase.add(io_panel);
 		panelBase.add(main_panel);
-	    // GUIにステータスバーとプログレスバーを追加
+	    // Added status bar and progress bar to GUI
 	    panelBase.add(buttomPanel, BorderLayout.SOUTH);
 	    
-	    // バックスペースで要素を削除するキーリスナー
+	    // Key listener to delete elements in backspace
 	    KeyListener listKeyListener = new KeyAdapter() {
 	        @Override
 	        public void keyPressed(KeyEvent e) {
@@ -294,7 +291,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	        }
 	    };
 
-	    // 各 JList にキーリスナーを追加
+	    // Add a key listener to each JList
 	    dir_tagslist.addKeyListener(listKeyListener);
 	    name_tagslist.addKeyListener(listKeyListener);
 	    range_list.addKeyListener(listKeyListener);
@@ -304,35 +301,36 @@ public class DICOM_Classifire extends PlugInFrame {
 		setVisible(true);
 	}
 	
-	// ステータスバーのテキストを更新するメソッド
+	// Method to update status bar text
 	private void setStatusText(String text) {
 	    statusLabel.setText(text);
-	    statusLabel.paintImmediately(statusLabel.getVisibleRect()); // UIスレッドで即座に更新
+	    statusLabel.paintImmediately(statusLabel.getVisibleRect()); // Instant updates in UI thread
 	}
 
-	// プログレスバーの値を更新するメソッド
+	// Method to update the value of the progress bar
 	private void setProgressValue(int value) {
 	    progressBar.setValue(value);
-	    progressBar.paintImmediately(progressBar.getVisibleRect()); // UIスレッドで即座に更新
+	    progressBar.paintImmediately(progressBar.getVisibleRect()); // Instant updates in UI thread
 	}
 	
+	//?��?Method to get all DICOM Tags
 	public static String getformatInfo(String filePath) {
-        DICOM dicom = new DICOM(); // DICOMクラスのインスタンスを作成
+        DICOM dicom = new DICOM(); // Create an instance of the DICOM class
         String predcminfo = dicom.getInfo(filePath);
         
         List<String> list = new ArrayList<>();
-        String lastDicomTag = null; // 最後に出現したDICOMタグ形式の行を保持する変数
+        String lastDicomTag = null; // Variable that holds the last occurrence of a line in DICOM tag format
 
-        // 文字列を改行で区切ってリストに追加
+        // Add string to list separated by a new line
         String[] lines = predcminfo.split("\n");
         for (String line : lines) {
-            // DICOMタグ形式かどうかを判定
+            // Determine if DICOM tag format
             if (line.matches("^\\w{4},\\w{4}.*")) {
-                // DICOMタグ形式の行の場合、そのままリストに追加し、最後のDICOMタグを更新
+                // For DICOM tag format rows, add to the list as is and update the last DICOM tag
                 list.add(line);
                 lastDicomTag = line;
             } else {
-                // DICOMタグ形式でない行の場合、直前のDICOMタグ形式の行の値の最後に追加
+                // If the line is not in DICOM tag format, append to the end of the value of the previous DICOM tag format line
                 if (lastDicomTag != null) {
                     int lastIndex = list.size() - 1;
                     String lastDicomTagValue = list.get(lastIndex);
@@ -340,29 +338,29 @@ public class DICOM_Classifire extends PlugInFrame {
                 }
             }
         }
-
-        // 改行を含む要素を削除
+        
+        // Get elements containing line breaks
         for (int i = 0; i < list.size(); i++) {
             String line = list.get(i);
             if (line.contains("\n")) {
-                // 改行を含む場合、改行を削除して要素を更新
+                // If it contains line breaks, remove line breaks and update the element
                 list.set(i, line.replace("\n", ""));
             }
         }
         
-        // LinkedHashSetを使用して重複する要素を一つにまとめる
+        // Combine duplicate elements into one using LinkedHashSet
         list = new ArrayList<>(new LinkedHashSet<>(list));
-        
-        // リストの内容を文字列に変換
+        // Convert list contents to string
         String dcmInfo = String.join("\n", list);
         
         return dcmInfo;
 	}
 	
+	// Method to retrieve an arbitrary DICOM tag
 	public static String getformatTag(String filePath, String dcm_tag) {
-	    String dcmInfo = getformatInfo(filePath); // DICOM 情報を取得
+	    String dcmInfo = getformatInfo(filePath); // Obtain DICOM information
 
-	    // ": " の後が空白か値のない行を削除
+	    // Delete lines with ": " followed by a space or no value
 	    List<String> list = new ArrayList<>();
 	    String[] lines = dcmInfo.split("\n");
 	    for (String line : lines) {
@@ -373,7 +371,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	        list.add(line);
 	    }
 
-	    // DICOM タグの値を取得
+	    // Get DICOM tag value
 	    String tagValue = "None";
 	    for (String line : list) {
 	        if (line.startsWith(dcm_tag)) {
@@ -394,7 +392,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	    String inputDir = IJ.getDirectory("Input directory");
 	    input_t.setText(inputDir);
 	    
-	    // SwingWorkerを使用してfindDICOMFilesInDirectoryメソッドを別のスレッドで実行する
+	    // Use SwingWorker to execute the findDICOMFilesInDirectory method in a separate thread
 	    SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
 	        @Override
 	        protected Void doInBackground() throws Exception {
@@ -405,26 +403,26 @@ public class DICOM_Classifire extends PlugInFrame {
 	        
 	        @Override
 	        protected void done() {
-	            // タスクが完了した後に実行する処理を記述する
-	            // リストのコピーを作成し、それをシャッフルする
+	            // Describe the process to be executed after the task is completed
+	            // Make a copy of the list and shuffle it
 	            List<String> shuffled_path = new ArrayList<>(dicomFilePaths);
 	            Collections.shuffle(shuffled_path);
-	            // uniqueTagsをクリアしてからタグを追加する
+	            // Clear uniqueTags and then add tags
 	            uniqueTags.clear();
 	            for (int i = 0; i < Math.min(shuffled_path.size(), 3); i++) {
 	                String file_path = shuffled_path.get(i);
 	                addUniqueTags(file_path, uniqueTags);
 	            }
-	            // JList にタグを設定
-	            taglist_model.clear(); // タグリストをクリア
+	            // Set tags in JList
+	            taglist_model.clear(); // Clear tag list
 	            for (String tag : uniqueTags) {
 	                taglist_model.addElement(tag);
 	            }
-	            setStatusText("Found " + dicomFilePaths.size() + " DICOM files."); // 追加
+	            setStatusText("Found " + dicomFilePaths.size() + " DICOM files."); // Add
 	        }
 	    };
 	    
-	    // SwingWorkerを実行する
+	    // Execute SwingWorker
 	    worker.execute();
 	}
 
@@ -458,14 +456,14 @@ public class DICOM_Classifire extends PlugInFrame {
 				}
 			}
 		}
-		setStatusText("Found " + dicomFilePaths.size() + " DICOM files."); // 追加
+		setStatusText("Found " + dicomFilePaths.size() + " DICOM files."); // Add
 	}
 
 	private void addUniqueTags(String filePath, List<String> uniqueTags) {
-	    String dcminfo = getformatInfo(filePath); // DICOM情報を取得
-	    String[] lines = dcminfo.split("\n"); // DICOM情報を行に分割
+	    String dcminfo = getformatInfo(filePath); // Obtain DICOM information
+	    String[] lines = dcminfo.split("\n"); // Split DICOM information into rows
 
-	    // 各行から ":" までの部分を取得し、重複しないタグをリストに追加
+	    // Get the part from each line up to ":" and add non-duplicate tags to the list
 	    for (String line : lines) {
 	        int colonIndex = line.indexOf(":");
 	        if (colonIndex != -1) {
@@ -478,29 +476,29 @@ public class DICOM_Classifire extends PlugInFrame {
 	}
 	
 	public void searchTagsList(DefaultListModel<String> taglist_model, List<String> uniqueTags) {
-		List<String> allTags = new ArrayList<>(uniqueTags); // uniqueTagsのコピーを作成
-		// フィルターテキストを整形して、大文字と小文字の違いを無視する
+		List<String> allTags = new ArrayList<>(uniqueTags); // Make a copy of uniqueTags
+		// Format filter text to ignore case differences
 		String searach = search_t.getText();
 		searach = searach.toLowerCase().replace(" ", "").replace(",", "").replace(":", "");
-		// 列挙されたタグをフィルタリングする
+		// Filter enumerated tags
 		taglist_model.clear(); // 列挙されたタグリストをクリア
 		for (String tag : allTags) {
-			// タグの文字列を整形して、大文字と小文字の違いを無視して検索する
+			// Format the tag string and search ignoring case
 			String formattedTag = tag.toLowerCase().replaceAll("[ ,:]", "");
 			if (formattedTag.contains(searach)) {
-				taglist_model.addElement(tag); // フィルターテキストにマッチするタグをリストに追加
+				taglist_model.addElement(tag); // Add tags matching the filter text to the list
 			}
 		}
 	}
 
 	public void addSelectedItemToActiveList(DefaultListModel<String> tagListModel, JTabbedPane tabbedPane) {
-	    // 選択されたアイテムを取得
+	    // Retrieve selected items
 	    List<String> selectedItems = tagslist.getSelectedValuesList();
-	    // アクティブなタブのインデックスを取得
+	    // Get index of active tab
 	    int selectedIndex = tabbedPane.getSelectedIndex();
-	    // 選択されたタブに対応するJListを取得
+	    // Get the JList corresponding to the selected tab
 	    JList<String> activeList = setall_tagsLists.get(selectedIndex);
-	    // タブが0番目の場合の処理
+	    // Processing when the tab is the 0th
 	    if (selectedIndex == 0) {
 	        for (String selectedItem : selectedItems) {
 	            dir_model.addElement(selectedItem);
@@ -522,7 +520,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	        double minValue = Double.parseDouble(minText);
 	        double maxValue = Double.parseDouble(maxText);
 	        
-	        // マイナス値が入力されている場合、minとmaxの大小関係を正しく表記し直す
+	        // If a negative value is entered, the relationship between min and max is re-stated correctly.
 	        double correctedMinValue = Math.min(minValue, maxValue);
 	        double correctedMaxValue = Math.max(minValue, maxValue);
 	        
@@ -547,7 +545,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	    }
 	}
 	
-    // 他のメソッドと同じように、get_tag_valuesメソッドを定義します。
+    // Define the get_tag_values method as you would any other method.
     private List<String> getpathlistItems(DefaultListModel<String> model) {
         List<String> listitems = new ArrayList<>();
         List<String> tagitems = new ArrayList<>();
@@ -571,7 +569,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	    List<String> dir_listItems = getpathlistItems(dir_model);
 	    List<String> name_listItems = getpathlistItems(name_model);
 	    
-	    // 分類用パスを保存するための新しいリスト
+	    // New list to store paths for classification
 	    List<String> classifyFiles = new ArrayList<>(dicomFilePaths);
 	    
 	    int totalFiles = classifyFiles.size();
@@ -593,7 +591,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	        	
 	        }else {
 	        	IJ.showMessage("Error", "No DICOM files found. Check the filtering conditions.");
-	        	return; // エラーメッセージを表示して処理を終了
+	        	return; // Display error message and terminate the process
 	        }
 	    };
 	    
@@ -614,8 +612,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	        }else {
 	        	IJ.showMessage("Error", "No DICOM files found. Check the filtering conditions.");
 	        	return;
-	        	} // エラーメッセージを表示して処理を終了
-	        
+	        	} // Display error message and terminate the process
 	    };
 	        
 	    for (int i = 0; i < totalFiles; i++) {
@@ -624,20 +621,18 @@ public class DICOM_Classifire extends PlugInFrame {
 	        
 	        // Check if the process should be canceled after each iteration
 	        if (cancelRequested) {
-	            break; // キャンセルが要求された場合、ループを抜ける
+	            break; // Exit loop if cancellation is requested
 	        }
-	        
 	    }
-	    // 処理完了時のメッセージを表示
+	    // Displays a message when the process is complete
         if (!cancelRequested) {
     	    setStatusText("Classification complete.");
         }
-        
 	}
 
 	private boolean isWithinRange(String filePath, Object filterType) {
 	        
-	        // フィルタのタイプに応じて DICOM タグのキーを設定する
+	        // Set DICOM tag keys according to filter type
 	        String tagKey = null;
 	        if (filterType.equals("Image Number")) {
 	            tagKey = "0020,0013";
@@ -645,10 +640,10 @@ public class DICOM_Classifire extends PlugInFrame {
 	            tagKey = "0020,1041";
 	        }
 	        
-	        // DICOM タグの値を取得する
+	        // Get the value of a DICOM tag
         	double filteredValue = Double.parseDouble(getformatTag(filePath, tagKey));
 
-	        // 指定された範囲内に DICOM タグの値があるかどうかをチェックする
+	        // Checks if there is a DICOM tag value within the specified range
 	        for (int i = 0; i < range_model.size(); i++) {
 	            String rangeText = range_model.getElementAt(i);
 	            double minValue = Double.parseDouble(rangeText.split(" ~ ")[0]);
@@ -671,11 +666,11 @@ public class DICOM_Classifire extends PlugInFrame {
 	        String elementValue = parts[0].split(",")[1];
 	        String valueValue = parts[1].toLowerCase().replaceAll(" ", "");
 	        String tagValue= String.format("%s,%s", groupValue, elementValue);
-	        // DICOMタグの値を取得
+	        // Get DICOM tag value
 	        String filteredTag = getformatTag(filePath, tagValue).toLowerCase().replaceAll(" ", "").replaceAll("\r\n", "").trim();
-	        // タグの値とフィルターの値を比較し、一致するかどうかをチェック
+	        // Compare tag values with filter values and check for a match
 	        if (filterType.equals("And")) {
-	            // すべてのタグと一致するかを確認
+	            // Check to see if all tags match
 	            if (filteredTag.equals(valueValue)) {
 	            	conditionMet = true;
 	            } else {
@@ -683,7 +678,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	                break;
 	            }
 	        } else if (filterType.equals("Or")) {
-	            // いずれかのタグが一致するかを確認
+	            // Check if any of the tags match
 	            if (filteredTag.equals(valueValue)) {
 	            	conditionMet = true;
 	                break;
@@ -783,7 +778,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	    String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
 	    int counter = 1;
 
-	    // ファイル名の末尾に "_1", "_2", "_3" などを付けていく
+	    // Append "_1", "_2", "_3", etc. to the end of the file name
 	    String newFileName = fileNameWithoutExtension + "_" + counter + "." + fileExtension;
 	    while (Files.exists(filePath.resolveSibling(newFileName))) {
 	        counter++;
@@ -792,7 +787,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	    return newFileName;
 	}
 
-	// ファイルのコピーを行うメソッド
+	// Methods to copy files
 	private void copyFile(Path orifilePath, Path newfilePath) {
 	    try {
 	        Files.copy(orifilePath, newfilePath, StandardCopyOption.REPLACE_EXISTING);
@@ -801,7 +796,7 @@ public class DICOM_Classifire extends PlugInFrame {
 	    }
 	}
 
-	// ポップアップダイアログを表示してユーザーの選択を処理するメソッド
+	// Methods to process user selections by displaying pop-up dialogs
 	private void handleUserChoice(Path orifilePath, Path newfilePath, int totalFiles, int i) {
 	    // Check if the file already exists and popup is not shown yet
 	    if (Files.exists(newfilePath) && !popup_shown) {
@@ -822,18 +817,18 @@ public class DICOM_Classifire extends PlugInFrame {
 	            rename = true; // Rename
 	        } else {
 	            // Cancel
-	            cancelRequested = true; // キャンセルが要求されたことをフラグに記録
+	            cancelRequested = true; // Flag records that a cancellation was requested
 		        //setProgressValue(0);
 		        setStatusText("canceled");
 		        try {
-		            // 2秒待つ
+		            // Wait 2 seconds
 		            Thread.sleep(2000);
 		        } catch (InterruptedException e) {
 		            e.printStackTrace();
 		        }
 		        setProgressValue(0);
 		        setStatusText("Ready.");
-	            return; // キャンセルが選ばれた場合、後続の処理を停止
+	            return; // If cancel is selected, subsequent processing stops
 	        }
 	    }
 
