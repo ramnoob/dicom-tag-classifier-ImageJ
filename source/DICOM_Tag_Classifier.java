@@ -313,7 +313,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    progressBar.paintImmediately(progressBar.getVisibleRect()); // Instant updates in UI thread
 	}
 	
-	//�?Method to get all DICOM Tags
+	//Method to get all DICOM Tags
 	public static String getformatInfo(String filePath) {
         DICOM dicom = new DICOM(); // Create an instance of the DICOM class
         String predcminfo = dicom.getInfo(filePath);
