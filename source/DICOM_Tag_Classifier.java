@@ -524,7 +524,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        double correctedMinValue = Math.min(minValue, maxValue);
 	        double correctedMaxValue = Math.max(minValue, maxValue);
 	        
-	        String rangeText = String.format("%.2f ~ %.2f : %s", correctedMinValue, correctedMaxValue, memoText);
+	        String rangeText = String.format("%s ~ %s : %s", correctedMinValue, correctedMaxValue, memoText);
 	        range_model.addElement(rangeText);
 	    } else {
 	        JOptionPane.showMessageDialog(this, "Please enter both minimum and maximum values.", "Error", JOptionPane.ERROR_MESSAGE);
