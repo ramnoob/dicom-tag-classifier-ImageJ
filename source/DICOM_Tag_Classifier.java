@@ -481,7 +481,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		String searach = search_t.getText();
 		searach = searach.toLowerCase().replace(" ", "").replace(",", "").replace(":", "");
 		// Filter enumerated tags
-		taglist_model.clear(); // 列挙されたタグリストをクリア
+		taglist_model.clear(); // clear taglist
 		for (String tag : allTags) {
 			// Format the tag string and search ignoring case
 			String formattedTag = tag.toLowerCase().replaceAll("[ ,:]", "");
@@ -779,10 +779,10 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    int counter = 1;
 
 	    // Append "_1", "_2", "_3", etc. to the end of the file name
-	    String newFileName = fileNameWithoutExtension + "_" + counter + "." + fileExtension;
+	    String newFileName = fileNameWithoutExtension + "_(" + counter + ")." + fileExtension;
 	    while (Files.exists(filePath.resolveSibling(newFileName))) {
 	        counter++;
-	        newFileName = fileNameWithoutExtension + "_" + counter + "." + fileExtension;
+	        newFileName = fileNameWithoutExtension + "_(" + counter + ")." + fileExtension;
 	    }
 	    return newFileName;
 	}
