@@ -4,6 +4,7 @@ import ij.plugin.frame.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -12,6 +13,9 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveTask;
+import java.util.concurrent.ExecutorService;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -386,78 +390,97 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	}
 
 
-	public void select_input() {
-	    dicomFilePaths = new ArrayList<>();
-	    setStatusText("Finding DICOM files...");
-	    String inputDir = IJ.getDirectory("Input directory");
-	    input_t.setText(inputDir);
-	    
-	    // Use SwingWorker to execute the findDICOMFilesInDirectory method in a separate thread
-	    SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-	        @Override
-	        protected Void doInBackground() throws Exception {
-	            // Find .dcm files in the input directory
-	            findDICOMFiles(inputDir);
-	            return null;
-	        }
-	        
-	        @Override
-	        protected void done() {
-	            // Describe the process to be executed after the task is completed
-	            // Make a copy of the list and shuffle it
-	            List<String> shuffled_path = new ArrayList<>(dicomFilePaths);
-	            Collections.shuffle(shuffled_path);
-	            // Clear uniqueTags and then add tags
-	            uniqueTags.clear();
-	            for (int i = 0; i < Math.min(shuffled_path.size(), 3); i++) {
-	                String file_path = shuffled_path.get(i);
-	                addUniqueTags(file_path, uniqueTags);
-	            }
-	            // Set tags in JList
-	            taglist_model.clear(); // Clear tag list
-	            for (String tag : uniqueTags) {
-	                taglist_model.addElement(tag);
-	            }
-	            setStatusText("Found " + dicomFilePaths.size() + " DICOM files."); // Add
-	        }
-	    };
-	    
-	    // Execute SwingWorker
-	    worker.execute();
-	}
+    public void select_input() {
+        dicomFilePaths = new ArrayList<>();
+        setStatusText("Finding DICOM files...");
+        String inputDir = IJ.getDirectory("Input directory");
+        input_t.setText(inputDir);
+
+        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                ForkJoinPool pool = new ForkJoinPool();
+                dicomFilePaths = pool.invoke(new DicomFileFinderTask(new File(inputDir)));
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                SwingUtilities.invokeLater(() -> {
+                    List<String> shuffledPaths = new ArrayList<>(dicomFilePaths);
+                    Collections.shuffle(shuffledPaths);
+
+                    uniqueTags.clear();
+                    for (int i = 0; i < Math.min(shuffledPaths.size(), 3); i++) {
+                        String filePath = shuffledPaths.get(i);
+                        addUniqueTags(filePath, uniqueTags);
+                    }
+
+                    taglist_model.clear();
+                    for (String tag : uniqueTags) {
+                        taglist_model.addElement(tag);
+                    }
+                    setStatusText("Found " + dicomFilePaths.size() + " DICOM files.");
+                });
+            }
+        };
+
+        worker.execute();
+    }
 
 	public void select_output() {
 		String outputDir = IJ.getDirectory("Output directory");
 		output_t.setText(outputDir);
 	}
+	
+    private boolean isDICOMFile(File file) {
+        try (FileInputStream fis = new FileInputStream(file)) {
+            byte[] buffer = new byte[132];
+            if (fis.read(buffer) == 132) {
+                String header = new String(buffer, 128, 4);
+                return "DICM".equals(header);
+            }
+        } catch (IOException e) {
+            // エラー処理
+        }
+        return false;
+    }
 
-	// Function to recursively find .dcm files in a directory
-	private List<String> findDICOMFiles(String directoryPath) {
-		findDICOMFilesInDirectory(new File(directoryPath), dicomFilePaths);
-		return dicomFilePaths;
-	}
+    private class DicomFileFinderTask extends RecursiveTask<List<String>> {
+        private final File directory;
 
-	// Recursive function to find .dcm files in a directory and its subdirectories
-	private void findDICOMFilesInDirectory(File directory, List<String> dicomFilePaths) {
-		// List all files and directories in the current directory
-		File[] files = directory.listFiles();
-		if (files != null) {
-			for (File file : files) {
-				if (file.isDirectory()) {
-					// If it's a directory, recursively call this function
-					findDICOMFilesInDirectory(file, dicomFilePaths);
-				} else {
-					ImagePlus imp = IJ.openImage(file.toString());
-					// If it's a file, check if it's a .dcm file
-					if (file.isFile() && imp != null) {
-						// If it's a .dcm file, add its path to the list
-						dicomFilePaths.add(file.getAbsolutePath());
-					}
-				}
-			}
-		}
-		setStatusText("Found " + dicomFilePaths.size() + " DICOM files."); // Add
-	}
+        DicomFileFinderTask(File directory) {
+            this.directory = directory;
+        }
+
+        @Override
+        protected List<String> compute() {
+            List<String> dicomFiles = new ArrayList<>();
+            List<DicomFileFinderTask> tasks = new ArrayList<>();
+
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        DicomFileFinderTask task = new DicomFileFinderTask(file);
+                        task.fork(); // サブタスクを非同期で実行
+                        tasks.add(task);
+                    } else if (file.isFile() && isDICOMFile(file)) {
+                        ImagePlus imp = IJ.openImage(file.toString());
+                        if (imp != null) {
+                            dicomFiles.add(file.getAbsolutePath());
+                        }
+                    }
+                }
+
+                for (DicomFileFinderTask task : tasks) {
+                    dicomFiles.addAll(task.join()); // サブタスクの結果を収集
+                }
+            }
+            return dicomFiles;
+        }
+    }
+
 
 	private void addUniqueTags(String filePath, List<String> uniqueTags) {
 	    String dcminfo = getformatInfo(filePath); // Obtain DICOM information
@@ -614,7 +637,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        	return;
 	        	} // Display error message and terminate the process
 	    };
-	        
+
 	    for (int i = 0; i < totalFiles; i++) {
 	        String filePath = classifyFiles.get(i);            
 	        processDICOMFile(filePath, outputFolderPath, dir_listItems, name_listItems, totalFiles, i);
