@@ -448,9 +448,13 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 
     private class DicomFileFinderTask extends RecursiveTask<List<String>> {
         private final File directory;
+        private int processedFiles;
+        private int totalFiles;
 
         DicomFileFinderTask(File directory) {
             this.directory = directory;
+            this.processedFiles = 0;
+            this.totalFiles = 0;
         }
 
         @Override
@@ -460,6 +464,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 
             File[] files = directory.listFiles();
             if (files != null) {
+            	totalFiles = files.length; // ディレクトリ内のファイルの合計数を取得
                 for (File file : files) {
                     if (file.isDirectory()) {
                         DicomFileFinderTask task = new DicomFileFinderTask(file);
@@ -470,6 +475,8 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
                         if (imp != null) {
                             dicomFiles.add(file.getAbsolutePath());
                         }
+                        processedFiles++; // 処理したファイル数を更新
+                        setStatusText("Found " + processedFiles + " DICOM files.");
                     }
                 }
 
