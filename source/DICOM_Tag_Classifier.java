@@ -16,6 +16,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.JOptionPane;
+
 public class DICOM_Tag_Classifier extends PlugInFrame {
 	// member variable
 	JTextField input_t = new JTextField(16);
