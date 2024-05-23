@@ -1,6 +1,7 @@
 import ij.*;
 import ij.plugin.*;
 import ij.plugin.frame.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,13 +12,16 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.JOptionPane;
 
+
 public class DICOM_Tag_Classifier extends PlugInFrame {
+
 	// member variable
 	JTextField input_t = new JTextField(16);
 	JTextField output_t = new JTextField(16);
@@ -54,6 +58,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		super("DICOM Tag Classifier");
 		setSize(650, 450);
 		EtchedBorder border =new EtchedBorder(EtchedBorder.LOWERED);
+
 		JPanel io_panel = new JPanel();
 		io_panel.setPreferredSize(new Dimension(600, 65));
 		// input panel
@@ -82,6 +87,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 				select_output();
 			}
 		});
+
 		JPanel main_panel = new JPanel();
 		// available panel
 		JPanel tag_panel = new JPanel();
@@ -105,6 +111,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		        }
 		    }
 		});
+
 		JScrollPane scroll_tagslist = new JScrollPane(tagslist);
 		scroll_tagslist.setPreferredSize(new Dimension(190, 250));
 		tag_panel.add(scroll_tagslist);
@@ -164,6 +171,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		name_cb.addItem("SOP Instance UID");
 		name_cb.addItem("Connect Tags");
 		name_panel.add(name_cb);
+
 		// filter panel
 		JPanel filter_panel = new JPanel();
 		filter_panel.setBorder(new TitledBorder(border, "Filtering"));
@@ -193,6 +201,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		rangeset_panel.add(max);
 		rangeset_panel.add(memo);
 		rangeset_panel.add(range_b);
+
 		
 		JList range_list = new JList(range_model);
 		JScrollPane scroll_range_list = new JScrollPane(range_list);
@@ -253,11 +262,13 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		statusLabel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		statusLabel.setPreferredSize(new Dimension(375, 25));
 		statusLabel.setBorder(new TitledBorder(border));
+
 	    // Setting up the progress bar
 	    progressBar.setStringPainted(true); // Enable percentage display
 		buttomPanel.add(statusLabel);
 	    buttomPanel.add(progressBar);
 		buttomPanel.add(start_b);
+
 		JPanel panelBase = new JPanel();
 		panelBase.setLayout(new BoxLayout(panelBase, BoxLayout.Y_AXIS));
 		panelBase.add(io_panel);
@@ -279,11 +290,13 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	            }
 	        }
 	    };
+
 	    // Add a key listener to each JList
 	    dir_tagslist.addKeyListener(listKeyListener);
 	    name_tagslist.addKeyListener(listKeyListener);
 	    range_list.addKeyListener(listKeyListener);
 	    advanced_list.addKeyListener(listKeyListener);
+
 		add(panelBase);
 		setVisible(true);
 	}
@@ -293,6 +306,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    statusLabel.setText(text);
 	    statusLabel.paintImmediately(statusLabel.getVisibleRect()); // Instant updates in UI thread
 	}
+
 	// Method to update the value of the progress bar
 	private void setProgressValue(int value) {
 	    progressBar.setValue(value);
@@ -306,6 +320,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
         
         List<String> list = new ArrayList<>();
         String lastDicomTag = null; // Variable that holds the last occurrence of a line in DICOM tag format
+
         // Add string to list separated by a new line
         String[] lines = predcminfo.split("\n");
         for (String line : lines) {
@@ -344,6 +359,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	// Method to retrieve an arbitrary DICOM tag
 	public static String getformatTag(String filePath, String dcm_tag) {
 	    String dcmInfo = getformatInfo(filePath); // Obtain DICOM information
+
 	    // Delete lines with ": " followed by a space or no value
 	    List<String> list = new ArrayList<>();
 	    String[] lines = dcmInfo.split("\n");
@@ -354,6 +370,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        }
 	        list.add(line);
 	    }
+
 	    // Get DICOM tag value
 	    String tagValue = "None";
 	    for (String line : list) {
@@ -367,6 +384,8 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    }
 	    return tagValue;
 	}
+
+
 	public void select_input() {
 	    dicomFilePaths = new ArrayList<>();
 	    setStatusText("Finding DICOM files...");
@@ -406,15 +425,18 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    // Execute SwingWorker
 	    worker.execute();
 	}
+
 	public void select_output() {
 		String outputDir = IJ.getDirectory("Output directory");
 		output_t.setText(outputDir);
 	}
+
 	// Function to recursively find .dcm files in a directory
 	private List<String> findDICOMFiles(String directoryPath) {
 		findDICOMFilesInDirectory(new File(directoryPath), dicomFilePaths);
 		return dicomFilePaths;
 	}
+
 	// Recursive function to find .dcm files in a directory and its subdirectories
 	private void findDICOMFilesInDirectory(File directory, List<String> dicomFilePaths) {
 		// List all files and directories in the current directory
@@ -436,9 +458,11 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		}
 		setStatusText("Found " + dicomFilePaths.size() + " DICOM files."); // Add
 	}
+
 	private void addUniqueTags(String filePath, List<String> uniqueTags) {
 	    String dcminfo = getformatInfo(filePath); // Obtain DICOM information
 	    String[] lines = dcminfo.split("\n"); // Split DICOM information into rows
+
 	    // Get the part from each line up to ":" and add non-duplicate tags to the list
 	    for (String line : lines) {
 	        int colonIndex = line.indexOf(":");
@@ -457,7 +481,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		String searach = search_t.getText();
 		searach = searach.toLowerCase().replace(" ", "").replace(",", "").replace(":", "");
 		// Filter enumerated tags
-		taglist_model.clear(); // clear taglist
+		taglist_model.clear(); // 列挙されたタグリストをクリア
 		for (String tag : allTags) {
 			// Format the tag string and search ignoring case
 			String formattedTag = tag.toLowerCase().replaceAll("[ ,:]", "");
@@ -466,6 +490,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 			}
 		}
 	}
+
 	public void addSelectedItemToActiveList(DefaultListModel<String> tagListModel, JTabbedPane tabbedPane) {
 	    // Retrieve selected items
 	    List<String> selectedItems = tagslist.getSelectedValuesList();
@@ -498,7 +523,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        // If a negative value is entered, the relationship between min and max is re-stated correctly.
 	        double correctedMinValue = Math.min(minValue, maxValue);
 	        double correctedMaxValue = Math.max(minValue, maxValue);
-
+	        
 	        String rangeText = String.format("%s ~ %s : %s", correctedMinValue, correctedMaxValue, memoText);
 	        range_model.addElement(rangeText);
 	    } else {
@@ -539,6 +564,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		popup_shown = false;
 		rename = false;
 		cancelRequested = false;
+
 	    String outputFolderPath = output_t.getText();
 	    List<String> dir_listItems = getpathlistItems(dir_model);
 	    List<String> name_listItems = getpathlistItems(name_model);
@@ -603,6 +629,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
     	    setStatusText("Classification complete.");
         }
 	}
+
 	private boolean isWithinRange(String filePath, Object filterType) {
 	        
 	        // Set DICOM tag keys according to filter type
@@ -615,6 +642,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        
 	        // Get the value of a DICOM tag
         	double filteredValue = Double.parseDouble(getformatTag(filePath, tagKey));
+
 	        // Checks if there is a DICOM tag value within the specified range
 	        for (int i = 0; i < range_model.size(); i++) {
 	            String rangeText = range_model.getElementAt(i);
@@ -628,7 +656,9 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	}
 	
 	private boolean isWithinAdvanced(String filePath, Object filterType) {
+
 	    boolean conditionMet = false;
+
 	    for (int i = 0; i < advanced_model.size(); i++) {
 	        String advancedText = advanced_model.getElementAt(i);
 	        String[] parts = advancedText.split("\\s+");
@@ -659,16 +689,19 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    }
 	    return conditionMet;
 	}
+
 	// Process DICOM File Method
 	private void processDICOMFile(String filePath, String outputFolderPath, List<String> dirItems, List<String> nameItems, int totalFiles, int i) {
 	    String subDir = outputFolderPath;
 	    String fileName = new File(filePath).getName();
+
 	    // Define a method to get tag values
 	    List<String> dirtagValues = new ArrayList<>();
 	    for (String diritem : dirItems) {
 	        String value = getformatTag(filePath, diritem).toString().replaceAll("[\\/:*?\"<>|]", "_").trim();
 	        dirtagValues.add(value);
 	    }
+
 	    // Handle directory name setting button cases
 	    if (name_cb.getSelectedItem().equals("SOP Instance UID")) {
 	        String uid = getformatTag(filePath, "0008,0018").toString();
@@ -681,6 +714,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        }
 	        fileName = String.join("_", nametagValues);
 	    }
+
 	    // Handle directory dir setting button cases
 	    if (dir_cb.getSelectedItem().equals("Layered")) {
 	        for (String dirvalue : dirtagValues) {
@@ -689,6 +723,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    } else if (dir_cb.getSelectedItem().equals("Connect Tags")) {
 	        subDir = Paths.get(subDir, String.join("_", dirtagValues)).toString();
 	    }
+
 	    // Check if range filter is enabled
 	    if (!range_cb.getSelectedItem().equals("Off")) {
 	        Object filterType = range_cb.getSelectedItem();
@@ -699,6 +734,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        } else if (filterType.equals("Slice Location")) {
 	            tagKey = "0020,1041";
 	        }
+
 	        // Loop through all selected range items
 	        for (int j = 0; j < range_model.size(); j++) {
 	            String rangeDir = range_model.getElementAt(j).replaceAll("[\\/:*?\"<>|]", "_"); // Escape special characters
@@ -710,12 +746,14 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	            if (!rangeSubDir.exists()) {
 	                rangeSubDir.mkdirs();
 	            }
+
 	            // Check if the file is within the current range
 	            if (minValue <= filteredValue && filteredValue <= maxValue) {
 	                // Process the file only if it is within the current range
 	                // Create new file path with range sub-directory
 	                Path newfilePath = Paths.get(subDirWithRange, fileName);
 	                Path orifilePath = Paths.get(filePath);
+
 	                // Handle user choice
 	                handleUserChoice(orifilePath, newfilePath, totalFiles, i);
 	            }
@@ -726,8 +764,10 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        if (!newDir.exists()) {
 	            newDir.mkdirs();
 	        }
+
 	        Path newfilePath = Paths.get(newDir.toString(), fileName);
 	        Path orifilePath = Paths.get(filePath);
+
 	        handleUserChoice(orifilePath, newfilePath, totalFiles, i);
 	    }
 	}
@@ -737,14 +777,16 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    String fileNameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.'));
 	    String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
 	    int counter = 1;
+
 	    // Append "_1", "_2", "_3", etc. to the end of the file name
-	    String newFileName = fileNameWithoutExtension + "_(" + counter + ")." + fileExtension;
+	    String newFileName = fileNameWithoutExtension + "_" + counter + "." + fileExtension;
 	    while (Files.exists(filePath.resolveSibling(newFileName))) {
 	        counter++;
-	        newFileName = fileNameWithoutExtension + "_(" + counter + ")." + fileExtension;
+	        newFileName = fileNameWithoutExtension + "_" + counter + "." + fileExtension;
 	    }
 	    return newFileName;
 	}
+
 	// Methods to copy files
 	private void copyFile(Path orifilePath, Path newfilePath) {
 	    try {
@@ -753,6 +795,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        e.printStackTrace();
 	    }
 	}
+
 	// Methods to process user selections by displaying pop-up dialogs
 	private void handleUserChoice(Path orifilePath, Path newfilePath, int totalFiles, int i) {
 	    // Check if the file already exists and popup is not shown yet
@@ -766,6 +809,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	                null,
 	                new String[]{"Overwrite", "Rename", "Cancel"},
 	                "Overwrite");
+
 	        // Process according to user's choice
 	        if (choice == JOptionPane.YES_OPTION) {
 	            rename = false; // Overwrite
@@ -787,6 +831,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	            return; // If cancel is selected, subsequent processing stops
 	        }
 	    }
+
 	    // Process according to user's choice
 	    try {
 	        if (!rename) {
@@ -797,6 +842,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	            String newFileName = getNewFileName(newfilePath);
 	            Files.copy(orifilePath, newfilePath.resolveSibling(newFileName));
 	        }
+
 	        // Update progress bar value and status bar text
 	        int progress = (int) ((i + 1) * 100 / totalFiles);
 	        setProgressValue(progress);
