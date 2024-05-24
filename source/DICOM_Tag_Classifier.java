@@ -3,6 +3,7 @@ import ij.plugin.*;
 import ij.plugin.frame.*;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,13 +13,19 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveTask;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.JOptionPane;
-
+import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
 
 public class DICOM_Tag_Classifier extends PlugInFrame {
 
@@ -34,17 +41,26 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	JTextField value = new JTextField(4);
 	List<String> dicomFilePaths = new ArrayList<>();
 	List<String> uniqueTags = new ArrayList<>();
-	List<JList> setall_tagsLists = new ArrayList<>();
+	//List<JList> setall_tagsLists = new ArrayList<>();
 	JList tagslist = new JList();
 	DefaultListModel<String> taglist_model = new DefaultListModel<>();
 	DefaultListModel<String> dir_model = new DefaultListModel<>();
+    // Create table model
+	DefaultTableModel table_model = new DefaultTableModel() {
+	    @Override
+	    public boolean isCellEditable(int row, int column) {
+	        // Prohibits editing of the second column (index 1)
+	        return column != 1;
+	    }
+	};
+    // Set table model to JTable
+    JTable dir_tagstable = new JTable(table_model);
 	DefaultListModel<String> name_model = new DefaultListModel<>();
 	DefaultListModel<String> range_model = new DefaultListModel<>();
 	DefaultListModel<String> advanced_model = new DefaultListModel<>();
 	JLabel statusLabel = new JLabel("Ready");
 	JProgressBar progressBar = new JProgressBar();
 	JTabbedPane path_tab = new JTabbedPane();
-	JComboBox dir_cb = new JComboBox();
 	JComboBox name_cb = new JComboBox();
 	JComboBox range_cb = new JComboBox();
 	JComboBox advanced_cb = new JComboBox();
@@ -147,15 +163,21 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		dir_panel.setLayout(new BoxLayout(dir_panel, BoxLayout.Y_AXIS));
 		path_tab.add("Directory", dir_panel);
 		path_tab.setForegroundAt(0, Color.BLACK);
-		JList dir_tagslist = new JList(dir_model);
-		// Add dir_tagslist to the list
-		setall_tagsLists.add(dir_tagslist);
-		JScrollPane scroll_dir_tagslist = new JScrollPane(dir_tagslist);
-		scroll_dir_tagslist.setPreferredSize(new Dimension(190, 190));
-		dir_panel.add(scroll_dir_tagslist);
-		dir_cb.addItem("Layered");
-		dir_cb.addItem("Connect Tags");
-		dir_panel.add(dir_cb);
+        // Add columns (columns)
+        table_model.addColumn("");
+        table_model.addColumn("Tag");
+        DefaultTableColumnModel columnModel = (DefaultTableColumnModel) dir_tagstable.getColumnModel();
+		TableColumn Lcolumn = null;
+		TableColumn Tcolumn = null;
+		Lcolumn = columnModel.getColumn(0);
+		Tcolumn = columnModel.getColumn(1);
+		Lcolumn.setPreferredWidth(20);
+		Tcolumn.setPreferredWidth(170);
+        
+        // Add table to scroll pane
+        JScrollPane scroll_dir_tagstable = new JScrollPane(dir_tagstable);
+		scroll_dir_tagstable.setPreferredSize(new Dimension(190, 190));
+		dir_panel.add(scroll_dir_tagstable);
 		// filename panel
 		JPanel name_panel = new JPanel();
 		name_panel.setLayout(new BoxLayout(name_panel, BoxLayout.Y_AXIS));
@@ -163,7 +185,6 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		path_tab.setForegroundAt(1, Color.BLACK);
 		JList name_tagslist = new JList(name_model);
 		// Add name_tagslist to list
-		setall_tagsLists.add(name_tagslist);
 		JScrollPane scroll_name_tagslist = new JScrollPane(name_tagslist);
 		scroll_name_tagslist.setPreferredSize(new Dimension(190, 190));
 		name_panel.add(scroll_name_tagslist);
@@ -258,13 +279,13 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		
 	    // Status Bar Settings
 		JPanel buttomPanel = new JPanel();
-		//JPanel statasPanel = new JPanel();
+
 		statusLabel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		statusLabel.setPreferredSize(new Dimension(375, 25));
 		statusLabel.setBorder(new TitledBorder(border));
 
 	    // Setting up the progress bar
-	    progressBar.setStringPainted(true); // Enable percentage display
+	    //progressBar.setStringPainted(true); // Enable percentage display
 		buttomPanel.add(statusLabel);
 	    buttomPanel.add(progressBar);
 		buttomPanel.add(start_b);
@@ -275,6 +296,24 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		panelBase.add(main_panel);
 	    // Added status bar and progress bar to GUI
 	    panelBase.add(buttomPanel, BorderLayout.SOUTH);
+	    
+	 // Key listener to delete rows in backspace for JTable
+	    KeyListener tableKeyListener = new KeyAdapter() {
+	        @Override
+	        public void keyPressed(KeyEvent e) {
+	            if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+	                JTable table = (JTable) e.getSource();
+	                int selectedRow = table.getSelectedRow();
+	                if (selectedRow != -1) {
+	                    DefaultTableModel model = (DefaultTableModel) table.getModel();
+	                    model.removeRow(selectedRow);
+	                }
+	            }
+	        }
+	    };
+
+	    // Add the key listener to the JTable
+	    dir_tagstable.addKeyListener(tableKeyListener);
 	    
 	    // Key listener to delete elements in backspace
 	    KeyListener listKeyListener = new KeyAdapter() {
@@ -292,7 +331,6 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    };
 
 	    // Add a key listener to each JList
-	    dir_tagslist.addKeyListener(listKeyListener);
 	    name_tagslist.addKeyListener(listKeyListener);
 	    range_list.addKeyListener(listKeyListener);
 	    advanced_list.addKeyListener(listKeyListener);
@@ -386,78 +424,101 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	}
 
 
-	public void select_input() {
-	    dicomFilePaths = new ArrayList<>();
-	    setStatusText("Finding DICOM files...");
-	    String inputDir = IJ.getDirectory("Input directory");
-	    input_t.setText(inputDir);
-	    
-	    // Use SwingWorker to execute the findDICOMFilesInDirectory method in a separate thread
-	    SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-	        @Override
-	        protected Void doInBackground() throws Exception {
-	            // Find .dcm files in the input directory
-	            findDICOMFiles(inputDir);
-	            return null;
-	        }
-	        
-	        @Override
-	        protected void done() {
-	            // Describe the process to be executed after the task is completed
-	            // Make a copy of the list and shuffle it
-	            List<String> shuffled_path = new ArrayList<>(dicomFilePaths);
-	            Collections.shuffle(shuffled_path);
-	            // Clear uniqueTags and then add tags
-	            uniqueTags.clear();
-	            for (int i = 0; i < Math.min(shuffled_path.size(), 3); i++) {
-	                String file_path = shuffled_path.get(i);
-	                addUniqueTags(file_path, uniqueTags);
-	            }
-	            // Set tags in JList
-	            taglist_model.clear(); // Clear tag list
-	            for (String tag : uniqueTags) {
-	                taglist_model.addElement(tag);
-	            }
-	            setStatusText("Found " + dicomFilePaths.size() + " DICOM files."); // Add
-	        }
-	    };
-	    
-	    // Execute SwingWorker
-	    worker.execute();
-	}
+    public void select_input() {
+        dicomFilePaths = new ArrayList<>();
+        setStatusText("Finding DICOM files...");
+        String inputDir = IJ.getDirectory("Input directory");
+        input_t.setText(inputDir);
+        setStatusText("Finding DICOM files...Please wait a moment...");
+        
+
+        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+            	progressBar.setIndeterminate(true);
+                ForkJoinPool pool = new ForkJoinPool();
+                dicomFilePaths = pool.invoke(new DicomFileFinderTask(new File(inputDir)));
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                SwingUtilities.invokeLater(() -> {
+                    List<String> shuffledPaths = new ArrayList<>(dicomFilePaths);
+                    Collections.shuffle(shuffledPaths);
+
+                    uniqueTags.clear();
+                    for (int i = 0; i < Math.min(shuffledPaths.size(), 3); i++) {
+                        String filePath = shuffledPaths.get(i);
+                        addUniqueTags(filePath, uniqueTags);
+                    }
+
+                    taglist_model.clear();
+                    for (String tag : uniqueTags) {
+                        taglist_model.addElement(tag);
+                    }
+                    setStatusText("Found " + dicomFilePaths.size() + " DICOM files.");
+                    progressBar.setIndeterminate(false);
+                });
+            }
+        };
+
+        worker.execute();
+    }
+    
 
 	public void select_output() {
 		String outputDir = IJ.getDirectory("Output directory");
 		output_t.setText(outputDir);
 	}
+	
+    private boolean isDICOMFile(File file) {
+        try (FileInputStream fis = new FileInputStream(file)) {
+            byte[] buffer = new byte[132];
+            if (fis.read(buffer) == 132) {
+                String header = new String(buffer, 128, 4);
+                return "DICM".equals(header);
+            }
+        } catch (IOException e) {
+            // error handling
+        }
+        return false;
+    }
 
-	// Function to recursively find .dcm files in a directory
-	private List<String> findDICOMFiles(String directoryPath) {
-		findDICOMFilesInDirectory(new File(directoryPath), dicomFilePaths);
-		return dicomFilePaths;
-	}
+    private class DicomFileFinderTask extends RecursiveTask<List<String>> {
+        private final File directory;
 
-	// Recursive function to find .dcm files in a directory and its subdirectories
-	private void findDICOMFilesInDirectory(File directory, List<String> dicomFilePaths) {
-		// List all files and directories in the current directory
-		File[] files = directory.listFiles();
-		if (files != null) {
-			for (File file : files) {
-				if (file.isDirectory()) {
-					// If it's a directory, recursively call this function
-					findDICOMFilesInDirectory(file, dicomFilePaths);
-				} else {
-					ImagePlus imp = IJ.openImage(file.toString());
-					// If it's a file, check if it's a .dcm file
-					if (file.isFile() && imp != null) {
-						// If it's a .dcm file, add its path to the list
-						dicomFilePaths.add(file.getAbsolutePath());
-					}
-				}
-			}
-		}
-		setStatusText("Found " + dicomFilePaths.size() + " DICOM files."); // Add
-	}
+        DicomFileFinderTask(File directory) {
+            this.directory = directory;
+        }
+
+        @Override
+        protected List<String> compute() {
+            List<String> dicomFiles = new ArrayList<>();
+            List<DicomFileFinderTask> tasks = new ArrayList<>();
+
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        DicomFileFinderTask task = new DicomFileFinderTask(file);
+                        task.fork(); // Asynchronous execution of subtasks
+                        tasks.add(task);
+                    } else if (file.isFile() && isDICOMFile(file)) {
+                        ImagePlus imp = IJ.openImage(file.toString());
+                        if (imp != null) {
+                            dicomFiles.add(file.getAbsolutePath());
+                        }
+                    }
+                }
+
+                for (DicomFileFinderTask task : tasks) {
+                    dicomFiles.addAll(task.join()); // サブタスクの結果を収集
+                }
+            }
+            return dicomFiles;
+        }
+    }
 
 	private void addUniqueTags(String filePath, List<String> uniqueTags) {
 	    String dcminfo = getformatInfo(filePath); // Obtain DICOM information
@@ -481,7 +542,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		String searach = search_t.getText();
 		searach = searach.toLowerCase().replace(" ", "").replace(",", "").replace(":", "");
 		// Filter enumerated tags
-		taglist_model.clear(); // 列挙されたタグリストをクリア
+		taglist_model.clear(); // Clear enumerated tag list
 		for (String tag : allTags) {
 			// Format the tag string and search ignoring case
 			String formattedTag = tag.toLowerCase().replaceAll("[ ,:]", "");
@@ -497,17 +558,34 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    // Get index of active tab
 	    int selectedIndex = tabbedPane.getSelectedIndex();
 	    // Get the JList corresponding to the selected tab
-	    JList<String> activeList = setall_tagsLists.get(selectedIndex);
 	    // Processing when the tab is the 0th
 	    if (selectedIndex == 0) {
 	        for (String selectedItem : selectedItems) {
-	            dir_model.addElement(selectedItem);
+	            // Add rows after checking for duplicates
+	            if (!isItemExists(selectedItem)) {
+	                int rowCount = dir_tagstable.getRowCount() + 1;
+	                table_model.addRow(new Object[]{rowCount, selectedItem});
+	            }
 	        }
-	    } else {
+	    } else if(selectedIndex == 1) {
 	        for (String selectedItem : selectedItems) {
-	            name_model.addElement(selectedItem);
+	            // Add only if there is no selectedItem in name_model
+	            if (!name_model.contains(selectedItem)) {
+	                name_model.addElement(selectedItem);
+	            }
 	        }
 	    }
+	}
+	
+	// Helper method to check if the specified item exists in table_model
+	private boolean isItemExists(String item) {
+	    for (int row = 0; row < table_model.getRowCount(); row++) {
+	        Object value = table_model.getValueAt(row, 1); // Get the value of the second column
+	        if (value != null && value.toString().equals(item)) {
+	            return true;
+	        }
+	    }
+	    return false;
 	}
 	
 	// Add Range Method
@@ -558,7 +636,52 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
         }
         return tagitems;
     }
-	
+
+    // Method to add data in the specified column to the list
+    public static List<Object> getColumnData(TableModel model, int columnIndex) {
+        List<Object> columnData = new ArrayList<>();
+        int rowCount = model.getRowCount();
+        for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+            Object cellValue = model.getValueAt(rowIndex, columnIndex);
+            columnData.add(cellValue);
+        }
+        return columnData;
+    }
+
+    public List<String> convertListToLayer(List<String> data) {
+        List<String> result = new ArrayList<>();
+        dir_tagstable.clearSelection();
+        
+        for (int i = 1; i < data.size(); i++) {
+            int currentValue = Integer.parseInt(data.get(i));
+            int previousValue = Integer.parseInt(data.get(i - 1));
+
+            if (currentValue == previousValue) {
+                result.add("_");
+            } else if (currentValue > previousValue) {
+                result.add("/");
+            } else {
+                result.add(" ");
+            }
+        }
+        
+        if (data.size()!=0) {
+        	result.add("/");
+        }
+        
+        return result;
+    }
+    
+    // Method to convert a List<Object> to a List<String>.
+    public static List<String> convertToStringList(List<Object> data) {
+        List<String> stringList = new ArrayList<>();
+        for (Object obj : data) {
+            stringList.add(obj.toString());
+        }
+        return stringList;
+    }
+    
+
 	// Classify Images Method
 	private void classifyImages() {
 		popup_shown = false;
@@ -566,7 +689,23 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		cancelRequested = false;
 
 	    String outputFolderPath = output_t.getText();
-	    List<String> dir_listItems = getpathlistItems(dir_model);
+	    //List<String> dir_listItems = getpathlistItems(dir_model);
+	    
+	    if (dir_tagstable.isEditing()) {
+	        dir_tagstable.clearSelection();
+	        dir_tagstable.getCellEditor().stopCellEditing();
+	    };
+	    
+        // Add column-by-column data to the list
+        List<Object> layerData = getColumnData(table_model, 0);
+        List<Object> tagData = getColumnData(table_model, 1);
+        
+        // Converts to string based on rules
+        List<String> layerList = convertToStringList(layerData);
+        List<String> layerResult = convertListToLayer(layerList);
+        
+        // Convert List<Object> to List<String>
+        List<String> dir_listItems = convertToStringList(tagData);
 	    List<String> name_listItems = getpathlistItems(name_model);
 	    
 	    // New list to store paths for classification
@@ -617,7 +756,12 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        
 	    for (int i = 0; i < totalFiles; i++) {
 	        String filePath = classifyFiles.get(i);            
-	        processDICOMFile(filePath, outputFolderPath, dir_listItems, name_listItems, totalFiles, i);
+	        processDICOMFile(filePath, outputFolderPath, dir_listItems, layerResult, name_listItems, i);
+	        
+	        // Update progress bar value and status bar text
+	        int progress = (int) ((i + 1) * 100 / totalFiles);
+	        setProgressValue(progress);
+	        setStatusText("Processed file " + (i + 1) + "/" + totalFiles);
 	        
 	        // Check if the process should be canceled after each iteration
 	        if (cancelRequested) {
@@ -691,13 +835,13 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	}
 
 	// Process DICOM File Method
-	private void processDICOMFile(String filePath, String outputFolderPath, List<String> dirItems, List<String> nameItems, int totalFiles, int i) {
+	private void processDICOMFile(String filePath, String outputFolderPath, List<String> dirTagItems, List<String> layerResult, List<String> nameItems, int i) {
 	    String subDir = outputFolderPath;
 	    String fileName = new File(filePath).getName();
 
 	    // Define a method to get tag values
 	    List<String> dirtagValues = new ArrayList<>();
-	    for (String diritem : dirItems) {
+	    for (String diritem : dirTagItems) {
 	        String value = getformatTag(filePath, diritem).toString().replaceAll("[\\/:*?\"<>|]", "_").trim();
 	        dirtagValues.add(value);
 	    }
@@ -715,14 +859,12 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        fileName = String.join("_", nametagValues);
 	    }
 
-	    // Handle directory dir setting button cases
-	    if (dir_cb.getSelectedItem().equals("Layered")) {
-	        for (String dirvalue : dirtagValues) {
-	            subDir = Paths.get(subDir, dirvalue).toString();
-	        }
-	    } else if (dir_cb.getSelectedItem().equals("Connect Tags")) {
-	        subDir = Paths.get(subDir, String.join("_", dirtagValues)).toString();
-	    }
+        // Process two lists simultaneously using indexes
+        for (int d = 0; d < dirtagValues.size(); d++) {
+            String dirTag = dirtagValues.get(d);
+            String layer = layerResult.get(d);
+            subDir = subDir + dirTag + layer;
+        }
 
 	    // Check if range filter is enabled
 	    if (!range_cb.getSelectedItem().equals("Off")) {
@@ -755,7 +897,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	                Path orifilePath = Paths.get(filePath);
 
 	                // Handle user choice
-	                handleUserChoice(orifilePath, newfilePath, totalFiles, i);
+	                handleUserChoice(orifilePath, newfilePath, i);
 	            }
 	        }
 	    } else {
@@ -768,7 +910,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        Path newfilePath = Paths.get(newDir.toString(), fileName);
 	        Path orifilePath = Paths.get(filePath);
 
-	        handleUserChoice(orifilePath, newfilePath, totalFiles, i);
+	        handleUserChoice(orifilePath, newfilePath, i);
 	    }
 	}
 	
@@ -797,7 +939,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	}
 
 	// Methods to process user selections by displaying pop-up dialogs
-	private void handleUserChoice(Path orifilePath, Path newfilePath, int totalFiles, int i) {
+	private void handleUserChoice(Path orifilePath, Path newfilePath, int i) {
 	    // Check if the file already exists and popup is not shown yet
 	    if (Files.exists(newfilePath) && !popup_shown) {
 	        popup_shown = true;
@@ -842,11 +984,6 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	            String newFileName = getNewFileName(newfilePath);
 	            Files.copy(orifilePath, newfilePath.resolveSibling(newFileName));
 	        }
-
-	        // Update progress bar value and status bar text
-	        int progress = (int) ((i + 1) * 100 / totalFiles);
-	        setProgressValue(progress);
-	        setStatusText("Processed file " + (i + 1) + "/" + totalFiles);
 	    } catch (IOException e) {
 	        e.printStackTrace();
 	    }
