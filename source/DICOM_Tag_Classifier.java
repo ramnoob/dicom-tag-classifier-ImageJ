@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -513,7 +512,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
                 }
 
                 for (DicomFileFinderTask task : tasks) {
-                    dicomFiles.addAll(task.join()); // サブタスクの結果を収集
+                    dicomFiles.addAll(task.join()); // Add Dicom file
                 }
             }
             return dicomFiles;
