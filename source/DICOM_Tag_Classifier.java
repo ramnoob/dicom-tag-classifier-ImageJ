@@ -23,6 +23,7 @@ import javax.swing.border.*;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
@@ -40,7 +41,6 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	JTextField value = new JTextField(4);
 	List<String> dicomFilePaths = new ArrayList<>();
 	List<String> uniqueTags = new ArrayList<>();
-	//List<JList> setall_tagsLists = new ArrayList<>();
 	JList tagslist = new JList();
 	DefaultListModel<String> taglist_model = new DefaultListModel<>();
 	DefaultListModel<String> dir_model = new DefaultListModel<>();
@@ -53,7 +53,25 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    }
 	};
     // Set table model to JTable
-    JTable dir_tagstable = new JTable(table_model);
+	JTable dir_tagstable = new JTable(table_model) {
+	    @Override
+	    public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+	        Component component = super.prepareRenderer(renderer, row, column);
+	        if (isRowSelected(row)) {
+	            component.setBackground(getSelectionBackground());
+	            //component.setForeground(getSelectionForeground());
+	        } else {
+	            if (getRowCount() == 0) {
+	                component.setBackground(Color.WHITE);
+	            } else {
+	                component.setBackground(row % 2 == 0 ? Color.WHITE : getBackground());
+	                //component.setForeground(getForeground());
+	            }
+	        }
+	        return component;
+	    }
+	};
+    
 	DefaultListModel<String> name_model = new DefaultListModel<>();
 	DefaultListModel<String> range_model = new DefaultListModel<>();
 	DefaultListModel<String> advanced_model = new DefaultListModel<>();
@@ -106,7 +124,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		JPanel main_panel = new JPanel();
 		// available panel
 		JPanel tag_panel = new JPanel();
-		tag_panel.setPreferredSize(new Dimension(190, 300));
+		tag_panel.setPreferredSize(new Dimension(200, 300));
 		tag_panel.setBorder(new TitledBorder(border, "Available Tags"));
 		main_panel.add(tag_panel);
 		tag_panel.setLayout(new BoxLayout(tag_panel, BoxLayout.Y_AXIS));
@@ -128,9 +146,9 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		});
 
 		JScrollPane scroll_tagslist = new JScrollPane(tagslist);
-		scroll_tagslist.setPreferredSize(new Dimension(190, 250));
+		scroll_tagslist.setPreferredSize(new Dimension(200, 270));
 		tag_panel.add(scroll_tagslist);
-		search_t.setPreferredSize(new Dimension(190, 20));
+		search_t.setPreferredSize(new Dimension(200, 30));
 		tag_panel.add(search_t);
 		// Add KeyListener to search text field
 		search_t.addKeyListener(new KeyListener() {
@@ -145,16 +163,12 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		
 		
 		JPanel rule_panel = new JPanel();
-		rule_panel.setBorder(new TitledBorder(border, "Created Rules"));
-		rule_panel.setPreferredSize(new Dimension(420, 300));
-		rule_panel.setLayout(new BoxLayout(rule_panel, BoxLayout.X_AXIS));
-		main_panel.add(rule_panel);
 		// building path panel
 		JPanel path_panel = new JPanel();
 		path_panel.setBorder(new TitledBorder(border, "Path Building"));
-		path_panel.setPreferredSize(new Dimension(200, 250));
-		path_tab.setPreferredSize(new Dimension(190, 247));
-		rule_panel.add(path_panel);
+		path_panel.setPreferredSize(new Dimension(200, 300));
+		main_panel.add(path_panel);
+		path_tab.setPreferredSize(new Dimension(190, 270));
 		// building path tab
 		path_panel.add(path_tab);
 		// directory panel
@@ -163,9 +177,11 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		path_tab.add("Directory", dir_panel);
 		path_tab.setForegroundAt(0, Color.BLACK);
         // Add columns (columns)
+	    dir_tagstable.setFillsViewportHeight(true); // Makes sure the table fills the viewport
         table_model.addColumn("");
         table_model.addColumn("Tag");
         DefaultTableColumnModel columnModel = (DefaultTableColumnModel) dir_tagstable.getColumnModel();
+        
 		TableColumn Lcolumn = null;
 		TableColumn Tcolumn = null;
 		Lcolumn = columnModel.getColumn(0);
@@ -175,8 +191,34 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
         
         // Add table to scroll pane
         JScrollPane scroll_dir_tagstable = new JScrollPane(dir_tagstable);
-		scroll_dir_tagstable.setPreferredSize(new Dimension(190, 190));
+		scroll_dir_tagstable.setPreferredSize(new Dimension(190, 208));
 		dir_panel.add(scroll_dir_tagstable);
+		
+		JPanel dir_button_panel = new JPanel();
+        dir_button_panel.setLayout(new BoxLayout(dir_button_panel, BoxLayout.X_AXIS));
+        Dimension buttonMaxSize = new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
+        
+        JButton serial_b = new JButton("Layered");
+		serial_b.setMaximumSize(buttonMaxSize);
+		dir_button_panel.add(serial_b);
+        serial_b.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                serial_number(dir_tagstable); 
+            }
+        });
+
+        JButton same_b = new JButton("Connect");
+		same_b.setMaximumSize(buttonMaxSize);
+		dir_button_panel.add(same_b);
+        same_b.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                same_number(dir_tagstable); 
+            }
+        });
+        
+		dir_panel.add(dir_button_panel);
+		
+		
 		// filename panel
 		JPanel name_panel = new JPanel();
 		name_panel.setLayout(new BoxLayout(name_panel, BoxLayout.Y_AXIS));
@@ -185,7 +227,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		JList name_tagslist = new JList(name_model);
 		// Add name_tagslist to list
 		JScrollPane scroll_name_tagslist = new JScrollPane(name_tagslist);
-		scroll_name_tagslist.setPreferredSize(new Dimension(190, 190));
+		scroll_name_tagslist.setPreferredSize(new Dimension(190, 202));
 		name_panel.add(scroll_name_tagslist);
 		name_cb.addItem("Off");
 		name_cb.addItem("SOP Instance UID");
@@ -195,11 +237,11 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		// filter panel
 		JPanel filter_panel = new JPanel();
 		filter_panel.setBorder(new TitledBorder(border, "Filtering"));
-		filter_panel.setPreferredSize(new Dimension(200, 250));
-		rule_panel.add(filter_panel);
+		filter_panel.setPreferredSize(new Dimension(200, 300));
+		main_panel.add(filter_panel);
 		// building filter tab
 		JTabbedPane filter_tab = new JTabbedPane();
-		filter_tab.setPreferredSize(new Dimension(190, 248));
+		filter_tab.setPreferredSize(new Dimension(190, 270));
 		filter_panel.add(filter_tab);
 		
 		// range panel
@@ -209,56 +251,55 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		filter_tab.setForegroundAt(0, Color.BLACK);
 		
 		JPanel rangeset_panel = new JPanel();
-		range_panel.add(rangeset_panel);
 		JButton range_b = new JButton("Add");
 		range_b.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				addRange();
 			}
 		});
-		rangeset_panel.setPreferredSize(new Dimension(190, 40));
+		rangeset_panel.setPreferredSize(new Dimension(190,45));
 		rangeset_panel.add(min);
 		rangeset_panel.add(max);
 		rangeset_panel.add(memo);
 		rangeset_panel.add(range_b);
+		range_panel.add(rangeset_panel);
 
-		
+		JPanel rangelist_panel = new JPanel();
 		JList range_list = new JList(range_model);
 		JScrollPane scroll_range_list = new JScrollPane(range_list);
-		scroll_range_list.setPreferredSize(new Dimension(190, 115));
-		range_cb.setPreferredSize(new Dimension(190, 7));
 		range_panel.add(scroll_range_list);
 		range_cb.addItem("Off");
 		range_cb.addItem("Image Number");
 		range_cb.addItem("Slice Location");
+		range_cb.setPreferredSize(new Dimension(190, 11));
 		range_panel.add(range_cb);
+		
 		// advanced panel
 		JPanel advanced_panel = new JPanel();
 		advanced_panel.setLayout(new BoxLayout(advanced_panel, BoxLayout.Y_AXIS));
 		filter_tab.add("Advanced", advanced_panel);
 		filter_tab.setForegroundAt(1, Color.BLACK);
 		JPanel advset_panel = new JPanel();
-		advanced_panel.add(advset_panel);
 		JButton adv_b = new JButton("Add");
 		adv_b.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				addAdvanced();
 			}
 		});
-		advset_panel.setPreferredSize(new Dimension(190, 40));
+		advset_panel.setPreferredSize(new Dimension(190, 45));
 		advset_panel.add(group);
 		advset_panel.add(element);
 		advset_panel.add(value);
 		advset_panel.add(adv_b);
+		advanced_panel.add(advset_panel);
 		
 		JList advanced_list = new JList(advanced_model);
 		JScrollPane scroll_advanced_list = new JScrollPane(advanced_list);
-		scroll_advanced_list.setPreferredSize(new Dimension(190, 115));
-		advanced_cb.setPreferredSize(new Dimension(190, 7));
 		advanced_panel.add(scroll_advanced_list);
 		advanced_cb.addItem("Off");
 		advanced_cb.addItem("And");
 		advanced_cb.addItem("Or");
+		advanced_cb.setPreferredSize(new Dimension(190, 11));
 		advanced_panel.add(advanced_cb);
 		
 		JButton start_b = new JButton("Start");
@@ -284,7 +325,6 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		statusLabel.setBorder(new TitledBorder(border));
 
 	    // Setting up the progress bar
-	    //progressBar.setStringPainted(true); // Enable percentage display
 		buttomPanel.add(statusLabel);
 	    buttomPanel.add(progressBar);
 		buttomPanel.add(start_b);
@@ -585,6 +625,43 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        }
 	    }
 	    return false;
+	}	
+	
+	private void serial_number(JTable table) {
+		
+	    if (dir_tagstable.isEditing()) {
+	        dir_tagstable.clearSelection();
+	        dir_tagstable.getCellEditor().stopCellEditing();
+	    };
+	    // Check if the model is an instance of DefaultTableModel to make it editable
+	    if (table_model instanceof DefaultTableModel) {
+	        DefaultTableModel defaultModel = (DefaultTableModel) table_model;
+
+	        // Iterate through each row of the table
+	        for (int rowIndex = 0; rowIndex < defaultModel.getRowCount(); rowIndex++) {
+	            // Set the sequential number in the first column (column index 0)
+	            defaultModel.setValueAt(rowIndex + 1, rowIndex, 0);
+	        }
+	    }
+	}
+	
+	private void same_number(JTable table) {
+
+	    if (dir_tagstable.isEditing()) {
+	        dir_tagstable.clearSelection();
+	        dir_tagstable.getCellEditor().stopCellEditing();
+	    };
+	    
+	    // Check if the model is an instance of DefaultTableModel to make it editable
+	    if (table_model instanceof DefaultTableModel) {
+	        DefaultTableModel defaultModel = (DefaultTableModel) table_model;
+
+	        // Iterate through each row of the table
+	        for (int rowIndex = 0; rowIndex < defaultModel.getRowCount(); rowIndex++) {
+	            // Set the value "1" in the first column (column index 0)
+	            defaultModel.setValueAt(1, rowIndex, 0);
+	        }
+	    }
 	}
 	
 	// Add Range Method
