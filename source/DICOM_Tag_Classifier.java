@@ -196,10 +196,10 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		
 		JPanel dir_button_panel = new JPanel();
         dir_button_panel.setLayout(new BoxLayout(dir_button_panel, BoxLayout.X_AXIS));
-        Dimension buttonMaxSize = new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
+        Dimension buttonMinSize = new Dimension(95, Integer.MAX_VALUE);
         
-        JButton serial_b = new JButton("Layered");
-		serial_b.setMaximumSize(buttonMaxSize);
+        JButton serial_b = new JButton("Layer");
+		serial_b.setMaximumSize(buttonMinSize);
 		dir_button_panel.add(serial_b);
         serial_b.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -208,14 +208,13 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
         });
 
         JButton same_b = new JButton("Connect");
-		same_b.setMaximumSize(buttonMaxSize);
+		same_b.setMaximumSize(buttonMinSize);
 		dir_button_panel.add(same_b);
         same_b.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 same_number(dir_tagstable); 
             }
         });
-        
 		dir_panel.add(dir_button_panel);
 		
 		
