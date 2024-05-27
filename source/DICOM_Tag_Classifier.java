@@ -713,11 +713,15 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
     }
 
     // Method to add data in the specified column to the list
-    public static List<Object> getColumnData(TableModel model, int columnIndex) {
+    public List<Object> getColumnData(TableModel model, int columnIndex) {
         List<Object> columnData = new ArrayList<>();
         int rowCount = model.getRowCount();
         for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
             Object cellValue = model.getValueAt(rowIndex, columnIndex);
+            if (cellValue == null || cellValue.toString().isEmpty()) {
+            	JOptionPane.showMessageDialog(null, "Numbering in Directory tab is incorrect.", "Error", JOptionPane.ERROR_MESSAGE);
+            	cancelRequested = true;
+            }
             columnData.add(cellValue);
         }
         return columnData;
@@ -736,14 +740,15 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
             } else if (currentValue > previousValue) {
                 result.add("/");
             } else {
-                result.add(" ");
+            	JOptionPane.showMessageDialog(this, "Numbering in Directory tab is incorrect.", "Error", JOptionPane.ERROR_MESSAGE);
+            	cancelRequested = true;
             }
         }
         
         if (data.size()!=0) {
         	result.add("/");
         }
-        
+        System.out.println(result);
         return result;
     }
     
@@ -774,10 +779,16 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
         // Add column-by-column data to the list
         List<Object> layerData = getColumnData(table_model, 0);
         List<Object> tagData = getColumnData(table_model, 1);
+        if (cancelRequested) {
+            return; // Exit loop if cancellation is requested
+        }
         
         // Converts to string based on rules
         List<String> layerList = convertToStringList(layerData);
         List<String> layerResult = convertListToLayer(layerList);
+        if (cancelRequested) {
+            return; // Exit loop if cancellation is requested
+        }
         
         // Convert List<Object> to List<String>
         List<String> dir_listItems = convertToStringList(tagData);
