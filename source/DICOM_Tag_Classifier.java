@@ -748,7 +748,6 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
         if (data.size()!=0) {
         	result.add("/");
         }
-        System.out.println(result);
         return result;
     }
     
