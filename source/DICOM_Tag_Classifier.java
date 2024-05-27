@@ -263,7 +263,6 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		rangeset_panel.add(range_b);
 		range_panel.add(rangeset_panel);
 
-		JPanel rangelist_panel = new JPanel();
 		JList range_list = new JList(range_model);
 		JScrollPane scroll_range_list = new JScrollPane(range_list);
 		range_panel.add(scroll_range_list);
@@ -842,16 +841,16 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    for (int i = 0; i < totalFiles; i++) {
 	        String filePath = classifyFiles.get(i);            
 	        processDICOMFile(filePath, outputFolderPath, dir_listItems, layerResult, name_listItems, i);
+	        	        
+	        // Check if the process should be canceled after each iteration
+	        if (cancelRequested) {
+	            break; // Exit loop if cancellation is requested
+	        }
 	        
 	        // Update progress bar value and status bar text
 	        int progress = (int) ((i + 1) * 100 / totalFiles);
 	        setProgressValue(progress);
 	        setStatusText("Processed file " + (i + 1) + "/" + totalFiles);
-	        
-	        // Check if the process should be canceled after each iteration
-	        if (cancelRequested) {
-	            break; // Exit loop if cancellation is requested
-	        }
 	    }
 	    // Displays a message when the process is complete
         if (!cancelRequested) {
@@ -1045,8 +1044,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        } else {
 	            // Cancel
 	            cancelRequested = true; // Flag records that a cancellation was requested
-		        //setProgressValue(0);
-		        setStatusText("canceled");
+		        setStatusText("Canceled...");
 		        try {
 		            // Wait 2 seconds
 		            Thread.sleep(2000);
@@ -1054,7 +1052,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		            e.printStackTrace();
 		        }
 		        setProgressValue(0);
-		        setStatusText("Ready.");
+		        setStatusText("Found " + dicomFilePaths.size() + " DICOM files.");
 	            return; // If cancel is selected, subsequent processing stops
 	        }
 	    }
