@@ -246,7 +246,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		// range panel
 		JPanel range_panel = new JPanel();
 		range_panel.setLayout(new BoxLayout(range_panel, BoxLayout.Y_AXIS));
-		filter_tab.add("Range", range_panel);
+		filter_tab.add("   Range   ", range_panel);
 		filter_tab.setForegroundAt(0, Color.BLACK);
 		
 		JPanel rangeset_panel = new JPanel();
