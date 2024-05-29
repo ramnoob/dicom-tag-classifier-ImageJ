@@ -250,13 +250,13 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		filter_tab.setForegroundAt(0, Color.BLACK);
 		
 		JPanel rangeset_panel = new JPanel();
+		rangeset_panel.setPreferredSize(new Dimension(190, 50));
 		JButton range_b = new JButton("Add");
 		range_b.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				addRange();
 			}
 		});
-		rangeset_panel.setPreferredSize(new Dimension(190,45));
 		rangeset_panel.add(min);
 		rangeset_panel.add(max);
 		rangeset_panel.add(memo);
@@ -265,11 +265,12 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 
 		JList range_list = new JList(range_model);
 		JScrollPane scroll_range_list = new JScrollPane(range_list);
+		scroll_range_list.setPreferredSize(new Dimension(190, 140));
 		range_panel.add(scroll_range_list);
 		range_cb.addItem("Off");
 		range_cb.addItem("Image Number");
 		range_cb.addItem("Slice Location");
-		range_cb.setPreferredSize(new Dimension(190, 11));
+		range_cb.setPreferredSize(new Dimension(190, 20));
 		range_panel.add(range_cb);
 		
 		// advanced panel
@@ -278,13 +279,13 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		filter_tab.add("Advanced", advanced_panel);
 		filter_tab.setForegroundAt(1, Color.BLACK);
 		JPanel advset_panel = new JPanel();
+		advset_panel.setPreferredSize(new Dimension(190, 50));
 		JButton adv_b = new JButton("Add");
 		adv_b.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				addAdvanced();
 			}
 		});
-		advset_panel.setPreferredSize(new Dimension(190, 45));
 		advset_panel.add(group);
 		advset_panel.add(element);
 		advset_panel.add(value);
@@ -293,11 +294,12 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		
 		JList advanced_list = new JList(advanced_model);
 		JScrollPane scroll_advanced_list = new JScrollPane(advanced_list);
+		scroll_advanced_list.setPreferredSize(new Dimension(190, 140));
 		advanced_panel.add(scroll_advanced_list);
 		advanced_cb.addItem("Off");
 		advanced_cb.addItem("And");
 		advanced_cb.addItem("Or");
-		advanced_cb.setPreferredSize(new Dimension(190, 11));
+		advanced_cb.setPreferredSize(new Dimension(190, 20));
 		advanced_panel.add(advanced_cb);
 		
 		JButton start_b = new JButton("Start");
