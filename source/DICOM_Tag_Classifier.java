@@ -937,7 +937,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    // Define a method to get tag values
 	    List<String> dirtagValues = new ArrayList<>();
 	    for (String diritem : dirTagItems) {
-	        String value = getformatTag(filePath, diritem).toString().replaceAll("[\\/:*?\"<>|]", "_").trim();
+	        String value = getformatTag(filePath, diritem).toString().replaceAll("[\\\\/:*?\"<>|]", "-").trim();
 	        dirtagValues.add(value);
 	    }
 
@@ -948,7 +948,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    } else if (name_cb.getSelectedItem().equals("Connect Tags")) {
 	        List<String> nametagValues = new ArrayList<>();
 	        for (String nameitem : nameItems) {
-	            String namevalue = getformatTag(filePath, nameitem).toString().replaceAll("[\\/:*?\"<>|]", "_").replaceAll("\r\n", "").trim();
+	            String namevalue = getformatTag(filePath, nameitem).toString().replaceAll("\r\n", "").replaceAll("[\\\\/:*?\"<>|]", "-").trim();
 	            nametagValues.add(namevalue);
 	        }
 	        fileName = String.join("_", nametagValues) + fileExtension;
@@ -974,7 +974,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 
 	        // Loop through all selected range items
 	        for (int j = 0; j < range_model.size(); j++) {
-	            String rangeDir = range_model.getElementAt(j).replaceAll("[\\/:*?\"<>|]", "_"); // Escape special characters
+	            String rangeDir = range_model.getElementAt(j).replaceAll("[\\\\/:*?\"<>|]", "-"); // Escape special characters
 	            double minValue = Double.parseDouble(rangeDir.split(" ~ ")[0]);
 	            double maxValue = Double.parseDouble(rangeDir.split(" ~ ")[1].split("_")[0]);
 	            double filteredValue = Double.parseDouble(getformatTag(filePath, tagKey));
