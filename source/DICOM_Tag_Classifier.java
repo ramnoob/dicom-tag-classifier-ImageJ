@@ -895,7 +895,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        String valueValue = parts[1].toLowerCase().replaceAll(" ", "");
 	        String tagValue= String.format("%s,%s", groupValue, elementValue);
 	        // Get DICOM tag value
-	        String filteredTag = getformatTag(filePath, tagValue).toLowerCase().replaceAll(" ", "").replaceAll("\r\n", "").trim();
+	        String filteredTag = getformatTag(filePath, tagValue).toLowerCase().replaceAll(" ", "").replaceAll("[\\r\\n]+", "").trim();
 	        // Compare tag values with filter values and check for a match
 	        if (filterType.equals("And")) {
 	            // Check to see if all tags match
@@ -948,7 +948,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    } else if (name_cb.getSelectedItem().equals("Connect Tags")) {
 	        List<String> nametagValues = new ArrayList<>();
 	        for (String nameitem : nameItems) {
-	            String namevalue = getformatTag(filePath, nameitem).toString().replaceAll("\r\n", "").replaceAll("[\\\\/:*?\"<>|]", "-").trim();
+	            String namevalue = getformatTag(filePath, nameitem).toString().replaceAll("[\\r\\n]+", "").replaceAll("[\\\\/:*?\"<>|]", "-").trim();
 	            nametagValues.add(namevalue);
 	        }
 	        fileName = String.join("_", nametagValues) + fileExtension;
