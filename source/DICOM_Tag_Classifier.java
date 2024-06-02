@@ -922,6 +922,17 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	private void processDICOMFile(String filePath, String outputFolderPath, List<String> dirTagItems, List<String> layerResult, List<String> nameItems, int i) {
 	    String subDir = outputFolderPath;
 	    String fileName = new File(filePath).getName();
+	    // Get file extension from filename
+        String fileExtension = "";
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex > 0 && dotIndex < fileName.length() - 1) {
+            String potentialExtension = fileName.substring(dotIndex).toLowerCase();
+            if (".dcm".equals(potentialExtension)) {
+            	fileExtension = fileName.substring(dotIndex);
+            } else {
+            	fileExtension = ""; // Empty string for invalid extension
+            }
+        }
 
 	    // Define a method to get tag values
 	    List<String> dirtagValues = new ArrayList<>();
@@ -933,14 +944,14 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    // Handle directory name setting button cases
 	    if (name_cb.getSelectedItem().equals("SOP Instance UID")) {
 	        String uid = getformatTag(filePath, "0008,0018").toString();
-	        fileName = uid;
+	        fileName = uid + fileExtension;
 	    } else if (name_cb.getSelectedItem().equals("Connect Tags")) {
 	        List<String> nametagValues = new ArrayList<>();
 	        for (String nameitem : nameItems) {
 	            String namevalue = getformatTag(filePath, nameitem).toString().replaceAll("[\\/:*?\"<>|]", "_").replaceAll("\r\n", "").trim();
 	            nametagValues.add(namevalue);
 	        }
-	        fileName = String.join("_", nametagValues);
+	        fileName = String.join("_", nametagValues) + fileExtension;
 	    }
 
         // Process two lists simultaneously using indexes
@@ -1000,26 +1011,28 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	
 	private String getNewFileName(Path filePath) {
 	    String fileName = filePath.getFileName().toString();
-	    String fileNameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.'));
-	    String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
+	    // Get file extension from filename
 	    int counter = 1;
+        String fileExtension = "";
+        String fileNameWithoutExtension = fileName;
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex > 0 && dotIndex < fileName.length() - 1) {
+            String potentialExtension = fileName.substring(dotIndex).toLowerCase();
+            if (".dcm".equals(potentialExtension)) {
+                fileExtension = fileName.substring(dotIndex);
+                fileNameWithoutExtension = fileName.substring(0, dotIndex);
+            } else {
+            	fileExtension = ""; // Empty string for invalid extension
+            }
+        }
 
-	    // Append "_1", "_2", "_3", etc. to the end of the file name
-	    String newFileName = fileNameWithoutExtension + "_(" + counter + ")." + fileExtension;
+	    // Append "(1)", "(2)", "(3)", etc. to the end of the file name
+	    String newFileName = fileNameWithoutExtension + " (" + counter + ")" + fileExtension;
 	    while (Files.exists(filePath.resolveSibling(newFileName))) {
 	        counter++;
-	        newFileName = fileNameWithoutExtension + "_(" + counter + ")." + fileExtension;
+	        newFileName = fileNameWithoutExtension + " (" + counter + ")" + fileExtension;
 	    }
 	    return newFileName;
-	}
-
-	// Methods to copy files
-	private void copyFile(Path orifilePath, Path newfilePath) {
-	    try {
-	        Files.copy(orifilePath, newfilePath, StandardCopyOption.REPLACE_EXISTING);
-	    } catch (IOException e) {
-	        e.printStackTrace();
-	    }
 	}
 
 	// Methods to process user selections by displaying pop-up dialogs
