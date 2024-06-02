@@ -404,7 +404,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
         String lastDicomTag = null; // Variable that holds the last occurrence of a line in DICOM tag format
 
         // Add string to list separated by a new line
-        String[] lines = predcminfo.split("\n");
+        String[] lines = predcminfo.split("[\\r\\n]+");
         for (String line : lines) {
             // Determine if DICOM tag format
             if (line.matches("^\\w{4},\\w{4}.*")) {
@@ -424,9 +424,9 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
         // Get elements containing line breaks
         for (int i = 0; i < list.size(); i++) {
             String line = list.get(i);
-            if (line.contains("\n")) {
+            if (line.contains("[\\r\\n]+")) {
                 // If it contains line breaks, remove line breaks and update the element
-                list.set(i, line.replace("\n", ""));
+                list.set(i, line.replace("[\\r\\n]+", ""));
             }
         }
         
@@ -444,7 +444,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 
 	    // Delete lines with ": " followed by a space or no value
 	    List<String> list = new ArrayList<>();
-	    String[] lines = dcmInfo.split("\n");
+	    String[] lines = dcmInfo.split("[\\r\\n]+");
 	    for (String line : lines) {
 	        int colonIndex = line.indexOf(":");
 	        if (colonIndex != -1 && colonIndex + 2 == line.length()) {
@@ -565,7 +565,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 
 	private void addUniqueTags(String filePath, List<String> uniqueTags) {
 	    String dcminfo = getformatInfo(filePath); // Obtain DICOM information
-	    String[] lines = dcminfo.split("\n"); // Split DICOM information into rows
+	    String[] lines = dcminfo.split("[\\r\\n]+"); // Split DICOM information into rows
 
 	    // Get the part from each line up to ":" and add non-duplicate tags to the list
 	    for (String line : lines) {
