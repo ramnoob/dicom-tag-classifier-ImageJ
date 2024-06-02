@@ -59,13 +59,11 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        Component component = super.prepareRenderer(renderer, row, column);
 	        if (isRowSelected(row)) {
 	            component.setBackground(getSelectionBackground());
-	            //component.setForeground(getSelectionForeground());
 	        } else {
 	            if (getRowCount() == 0) {
 	                component.setBackground(Color.WHITE);
 	            } else {
 	                component.setBackground(row % 2 == 0 ? Color.WHITE : getBackground());
-	                //component.setForeground(getForeground());
 	            }
 	        }
 	        return component;
@@ -179,18 +177,21 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
         // Add columns (columns)
 	    dir_tagstable.setFillsViewportHeight(true); // Makes sure the table fills the viewport
         table_model.addColumn("");
-        table_model.addColumn("Tag");
+        table_model.addColumn("");
         DefaultTableColumnModel columnModel = (DefaultTableColumnModel) dir_tagstable.getColumnModel();
+        dir_tagstable.setTableHeader(null);
+		// Disable JTable auto-scrolling
+		dir_tagstable.setAutoscrolls(false);
         
-		TableColumn Lcolumn = null;
-		TableColumn Tcolumn = null;
-		Lcolumn = columnModel.getColumn(0);
-		Tcolumn = columnModel.getColumn(1);
+		TableColumn Lcolumn = columnModel.getColumn(0);
+		TableColumn Tcolumn = columnModel.getColumn(1);
+		dir_tagstable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		Lcolumn.setPreferredWidth(20);
-		Tcolumn.setPreferredWidth(170);
-        
+		Tcolumn.setPreferredWidth(400);
+		
         // Add table to scroll pane
         JScrollPane scroll_dir_tagstable = new JScrollPane(dir_tagstable);
+        
 		scroll_dir_tagstable.setPreferredSize(new Dimension(190, 208));
 		dir_panel.add(scroll_dir_tagstable);
 		
@@ -339,12 +340,16 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	 // Key listener to delete rows in backspace for JTable
 	    KeyListener tableKeyListener = new KeyAdapter() {
 	        @Override
-	        public void keyPressed(KeyEvent e) {
+	        public void keyReleased(KeyEvent e) {
 	            if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
 	                JTable table = (JTable) e.getSource();
 	                int selectedRow = table.getSelectedRow();
 	                if (selectedRow != -1) {
 	                    DefaultTableModel model = (DefaultTableModel) table.getModel();
+	                    // Stop cell editing if it is ongoing
+	            	    if (dir_tagstable.isEditing()) {
+	            	        dir_tagstable.getCellEditor().stopCellEditing();
+	            	    };
 	                    model.removeRow(selectedRow);
 	                }
 	            }
@@ -357,7 +362,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    // Key listener to delete elements in backspace
 	    KeyListener listKeyListener = new KeyAdapter() {
 	        @Override
-	        public void keyPressed(KeyEvent e) {
+	        public void keyReleased(KeyEvent e) {
 	            if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
 	                JList list = (JList) e.getSource();
 	                int selectedIndex = list.getSelectedIndex();
@@ -470,7 +475,6 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
         input_t.setText(inputDir);
         setStatusText("Finding DICOM files...Please wait a moment...");
         
-
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
@@ -630,7 +634,6 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	private void serial_number(JTable table) {
 		
 	    if (dir_tagstable.isEditing()) {
-	        dir_tagstable.clearSelection();
 	        dir_tagstable.getCellEditor().stopCellEditing();
 	    };
 	    // Check if the model is an instance of DefaultTableModel to make it editable
@@ -648,7 +651,6 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	private void same_number(JTable table) {
 
 	    if (dir_tagstable.isEditing()) {
-	        dir_tagstable.clearSelection();
 	        dir_tagstable.getCellEditor().stopCellEditing();
 	    };
 	    
@@ -730,7 +732,6 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 
     public List<String> convertListToLayer(List<String> data) {
         List<String> result = new ArrayList<>();
-        dir_tagstable.clearSelection();
         
         for (int i = 1; i < data.size(); i++) {
             int currentValue = Integer.parseInt(data.get(i));
@@ -761,18 +762,15 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
         return stringList;
     }
     
-
 	// Classify Images Method
 	private void classifyImages() {
 		popup_shown = false;
 		rename = false;
 		cancelRequested = false;
-
 	    String outputFolderPath = output_t.getText();
-	    //List<String> dir_listItems = getpathlistItems(dir_model);
-	    
+        
 	    if (dir_tagstable.isEditing()) {
-	        dir_tagstable.clearSelection();
+	    	dir_tagstable.clearSelection();
 	        dir_tagstable.getCellEditor().stopCellEditing();
 	    };
 	    
@@ -1007,10 +1005,10 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    int counter = 1;
 
 	    // Append "_1", "_2", "_3", etc. to the end of the file name
-	    String newFileName = fileNameWithoutExtension + "_" + counter + "." + fileExtension;
+	    String newFileName = fileNameWithoutExtension + "_(" + counter + ")." + fileExtension;
 	    while (Files.exists(filePath.resolveSibling(newFileName))) {
 	        counter++;
-	        newFileName = fileNameWithoutExtension + "_" + counter + "." + fileExtension;
+	        newFileName = fileNameWithoutExtension + "_(" + counter + ")." + fileExtension;
 	    }
 	    return newFileName;
 	}
