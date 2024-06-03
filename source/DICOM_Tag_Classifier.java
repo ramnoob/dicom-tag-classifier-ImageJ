@@ -974,7 +974,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 
 	        // Loop through all selected range items
 	        for (int j = 0; j < range_model.size(); j++) {
-	            String rangeDir = range_model.getElementAt(j).replaceAll("[\\\\/:*?\"<>|]", "-"); // Escape special characters
+	            String rangeDir = range_model.getElementAt(j).replaceAll("[\\\\/:*?\"<>|]", "_"); // Escape special characters
 	            double minValue = Double.parseDouble(rangeDir.split(" ~ ")[0]);
 	            double maxValue = Double.parseDouble(rangeDir.split(" ~ ")[1].split("_")[0]);
 	            double filteredValue = Double.parseDouble(getformatTag(filePath, tagKey));
