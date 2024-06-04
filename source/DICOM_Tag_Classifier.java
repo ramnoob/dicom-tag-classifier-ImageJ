@@ -43,9 +43,8 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	List<String> uniqueTags = new ArrayList<>();
 	JList tagslist = new JList();
 	DefaultListModel<String> taglist_model = new DefaultListModel<>();
-	DefaultListModel<String> dir_model = new DefaultListModel<>();
     // Create table model
-	DefaultTableModel table_model = new DefaultTableModel() {
+	DefaultTableModel dir_model = new DefaultTableModel() {
 	    @Override
 	    public boolean isCellEditable(int row, int column) {
 	        // Prohibits editing of the second column (index 1)
@@ -53,7 +52,83 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    }
 	};
     // Set table model to JTable
-	JTable dir_tagstable = new JTable(table_model) {
+	JTable dir_tagstable = new JTable(dir_model) {
+	    @Override 
+	    public String getToolTipText(MouseEvent e) {
+	        int row = rowAtPoint(e.getPoint());
+	        int column = columnAtPoint(e.getPoint());
+	        // Check if the row and column are valid
+	        if (row == -1 || column == -1) {
+	            return null; // Return null if the mouse is not over a valid cell
+	        }
+	        row = convertRowIndexToModel(row);
+	        column = convertColumnIndexToModel(column);
+	        TableModel m = getModel();
+	        Object cellValue = m.getValueAt(row, column);
+	        if (cellValue == null || cellValue.toString().trim().isEmpty()) {
+	            return null; 
+	        }
+	        return "<html>" + cellValue.toString() + "</html>";
+	    }
+	    
+	    @Override
+	    public Point getToolTipLocation(MouseEvent e) {
+	        Point p = e.getPoint();
+	        p.translate(5, -15);
+	        return p;
+	    }
+		
+	    @Override
+	    public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+	        Component component = super.prepareRenderer(renderer, row, column);
+	        if (isRowSelected(row)) {
+	            component.setBackground(getSelectionBackground());
+	        } else {
+	            if (getRowCount() == 0) {
+	                component.setBackground(Color.WHITE);
+	            } else {
+	                component.setBackground(row % 2 == 0 ? Color.WHITE : getBackground());
+	            }
+	        }
+	        return component;
+	    }
+	};
+	
+    // Create table model
+	DefaultTableModel name_model = new DefaultTableModel() {
+	    @Override
+	    public boolean isCellEditable(int row, int column) {
+	        // Prohibits editing of the second column (index 1)
+	        return column != 0;
+	    }
+	};
+    // Set table model to JTable
+	JTable name_table = new JTable(name_model) {
+	    @Override 
+	    public String getToolTipText(MouseEvent e) {
+	        int row = rowAtPoint(e.getPoint());
+	        int column = columnAtPoint(e.getPoint());
+	        // Check if the row and column are valid
+	        if (row == -1 || column == -1) {
+	            return null; // Return null if the mouse is not over a valid cell
+	        }
+	        row = convertRowIndexToModel(row);
+	        column = convertColumnIndexToModel(column);
+	        TableModel m = getModel();
+	        Object cellValue = m.getValueAt(row, column);
+	        if (cellValue == null || cellValue.toString().trim().isEmpty()) {
+	            return null;
+	        }
+	        return "<html>" + cellValue.toString() + "</html>";
+	    }		
+	    
+	    @Override
+	    public Point getToolTipLocation(MouseEvent e) {
+	        Point p = e.getPoint();
+	        p.translate(5, -15);
+	        return p;
+	    }
+	    
 	    @Override
 	    public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 	        Component component = super.prepareRenderer(renderer, row, column);
@@ -70,7 +145,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    }
 	};
     
-	DefaultListModel<String> name_model = new DefaultListModel<>();
+	//DefaultListModel<String> name_model = new DefaultListModel<>();
 	DefaultListModel<String> range_model = new DefaultListModel<>();
 	DefaultListModel<String> advanced_model = new DefaultListModel<>();
 	JLabel statusLabel = new JLabel("Ready");
@@ -159,8 +234,6 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 			}
 		});
 		
-		
-		JPanel rule_panel = new JPanel();
 		// building path panel
 		JPanel path_panel = new JPanel();
 		path_panel.setBorder(new TitledBorder(border, "Path Building"));
@@ -176,18 +249,29 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		path_tab.setForegroundAt(0, Color.BLACK);
         // Add columns (columns)
 	    dir_tagstable.setFillsViewportHeight(true); // Makes sure the table fills the viewport
-        table_model.addColumn("");
-        table_model.addColumn("");
+        dir_model.addColumn("");
+        dir_model.addColumn("Tag");
+        dir_model.addColumn("Memo");
         DefaultTableColumnModel columnModel = (DefaultTableColumnModel) dir_tagstable.getColumnModel();
-        dir_tagstable.setTableHeader(null);
-		// Disable JTable auto-scrolling
-		dir_tagstable.setAutoscrolls(false);
         
 		TableColumn Lcolumn = columnModel.getColumn(0);
 		TableColumn Tcolumn = columnModel.getColumn(1);
-		dir_tagstable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		TableColumn Mcolumn = columnModel.getColumn(2);
 		Lcolumn.setPreferredWidth(20);
-		Tcolumn.setPreferredWidth(400);
+		Tcolumn.setPreferredWidth(120);
+		Mcolumn.setPreferredWidth(50);
+
+		dir_tagstable.addMouseMotionListener(new MouseMotionAdapter() {
+		    @Override
+		    public void mouseMoved(MouseEvent e) {
+		        int row = dir_tagstable.rowAtPoint(e.getPoint());
+		        if (row != -1) {
+		            dir_tagstable.setRowSelectionInterval(row, row);
+		        } else {
+		            dir_tagstable.clearSelection();
+		        }
+		    }
+		});
 		
         // Add table to scroll pane
         JScrollPane scroll_dir_tagstable = new JScrollPane(dir_tagstable);
@@ -218,17 +302,41 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
         });
 		dir_panel.add(dir_button_panel);
 		
-		
 		// filename panel
 		JPanel name_panel = new JPanel();
 		name_panel.setLayout(new BoxLayout(name_panel, BoxLayout.Y_AXIS));
 		path_tab.add("FileName", name_panel);
 		path_tab.setForegroundAt(1, Color.BLACK);
-		JList name_tagslist = new JList(name_model);
-		// Add name_tagslist to list
-		JScrollPane scroll_name_tagslist = new JScrollPane(name_tagslist);
-		scroll_name_tagslist.setPreferredSize(new Dimension(190, 202));
-		name_panel.add(scroll_name_tagslist);
+		
+        // Add columns (columns)
+	    name_table.setFillsViewportHeight(true); // Makes sure the table fills the viewport
+        name_model.addColumn("Tag");
+        name_model.addColumn("Memo");
+        DefaultTableColumnModel NcolumnModel = (DefaultTableColumnModel) name_table.getColumnModel();
+		
+		name_table.addMouseMotionListener(new MouseMotionAdapter() {
+		    @Override
+		    public void mouseMoved(MouseEvent e) {
+		        int row = name_table.rowAtPoint(e.getPoint());
+		        if (row != -1) {
+		            name_table.setRowSelectionInterval(row, row);
+		        } else {
+		            name_table.clearSelection();
+		        }
+		    }
+		});
+        
+		TableColumn NTcolumn = NcolumnModel.getColumn(0);
+		TableColumn NMcolumn = NcolumnModel.getColumn(1);
+		NTcolumn.setPreferredWidth(140);
+		NMcolumn.setPreferredWidth(50);
+		
+        // Add table to scroll pane
+        JScrollPane scroll_name_tagstable = new JScrollPane(name_table);
+        
+        scroll_name_tagstable.setPreferredSize(new Dimension(190, 202));
+		name_panel.add(scroll_name_tagstable);
+
 		name_cb.addItem("Off");
 		name_cb.addItem("SOP Instance UID");
 		name_cb.addItem("Connect Tags");
@@ -337,7 +445,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    // Added status bar and progress bar to GUI
 	    panelBase.add(buttomPanel, BorderLayout.SOUTH);
 	    
-	 // Key listener to delete rows in backspace for JTable
+	    // Key listener to delete rows in backspace for JTable
 	    KeyListener tableKeyListener = new KeyAdapter() {
 	        @Override
 	        public void keyReleased(KeyEvent e) {
@@ -358,6 +466,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 
 	    // Add the key listener to the JTable
 	    dir_tagstable.addKeyListener(tableKeyListener);
+	    name_table.addKeyListener(tableKeyListener);
 	    
 	    // Key listener to delete elements in backspace
 	    KeyListener listKeyListener = new KeyAdapter() {
@@ -375,7 +484,6 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    };
 
 	    // Add a key listener to each JList
-	    name_tagslist.addKeyListener(listKeyListener);
 	    range_list.addKeyListener(listKeyListener);
 	    advanced_list.addKeyListener(listKeyListener);
 
@@ -452,7 +560,6 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        }
 	        list.add(line);
 	    }
-
 	    // Get DICOM tag value
 	    String tagValue = "None";
 	    for (String line : list) {
@@ -466,7 +573,6 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    }
 	    return tagValue;
 	}
-
 
     public void select_input() {
         dicomFilePaths = new ArrayList<>();
@@ -605,31 +711,31 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    if (selectedIndex == 0) {
 	        for (String selectedItem : selectedItems) {
 	            // Add rows after checking for duplicates
-	            if (!isItemExists(selectedItem)) {
+	            if (!isItemExists(dir_model, selectedItem)) {
 	                int rowCount = dir_tagstable.getRowCount() + 1;
-	                table_model.addRow(new Object[]{rowCount, selectedItem});
+	                dir_model.addRow(new Object[]{rowCount, selectedItem});
 	            }
 	        }
 	    } else if(selectedIndex == 1) {
 	        for (String selectedItem : selectedItems) {
 	            // Add only if there is no selectedItem in name_model
-	            if (!name_model.contains(selectedItem)) {
-	                name_model.addElement(selectedItem);
+	            if (!isItemExists(name_model, selectedItem)) {
+	            	name_model.addRow(new Object[]{selectedItem});
 	            }
 	        }
 	    }
 	}
 	
 	// Helper method to check if the specified item exists in table_model
-	private boolean isItemExists(String item) {
-	    for (int row = 0; row < table_model.getRowCount(); row++) {
-	        Object value = table_model.getValueAt(row, 1); // Get the value of the second column
+	private boolean isItemExists(DefaultTableModel tableModel, String item) {
+	    for (int row = 0; row < tableModel.getRowCount(); row++) {
+	        Object value = tableModel.getValueAt(row, 1); // Get the value of the second column
 	        if (value != null && value.toString().equals(item)) {
 	            return true;
 	        }
 	    }
 	    return false;
-	}	
+	}
 	
 	private void serial_number(JTable table) {
 		
@@ -637,8 +743,8 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        dir_tagstable.getCellEditor().stopCellEditing();
 	    };
 	    // Check if the model is an instance of DefaultTableModel to make it editable
-	    if (table_model instanceof DefaultTableModel) {
-	        DefaultTableModel defaultModel = (DefaultTableModel) table_model;
+	    if (dir_model instanceof DefaultTableModel) {
+	        DefaultTableModel defaultModel = (DefaultTableModel) dir_model;
 
 	        // Iterate through each row of the table
 	        for (int rowIndex = 0; rowIndex < defaultModel.getRowCount(); rowIndex++) {
@@ -655,8 +761,8 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    };
 	    
 	    // Check if the model is an instance of DefaultTableModel to make it editable
-	    if (table_model instanceof DefaultTableModel) {
-	        DefaultTableModel defaultModel = (DefaultTableModel) table_model;
+	    if (dir_model instanceof DefaultTableModel) {
+	        DefaultTableModel defaultModel = (DefaultTableModel) dir_model;
 
 	        // Iterate through each row of the table
 	        for (int rowIndex = 0; rowIndex < defaultModel.getRowCount(); rowIndex++) {
@@ -701,19 +807,6 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    }
 	}
 	
-    // Define the get_tag_values method as you would any other method.
-    private List<String> getpathlistItems(DefaultListModel<String> model) {
-        List<String> listitems = new ArrayList<>();
-        List<String> tagitems = new ArrayList<>();
-        listitems = Collections.list(model.elements());
-        for (String item : listitems) {
-        	String tag_group = item.substring(0, 4); // Get group
-        	String tag_element = item.substring(5, 9); // Get element
-        	String dicom_tag = String.format("%s,%s", tag_group, tag_element);
-        	tagitems.add(dicom_tag);
-        }
-        return tagitems;
-    }
 
     // Method to add data in the specified column to the list
     public List<Object> getColumnData(TableModel model, int columnIndex) {
@@ -721,9 +814,8 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
         int rowCount = model.getRowCount();
         for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
             Object cellValue = model.getValueAt(rowIndex, columnIndex);
-            if (cellValue == null || cellValue.toString().isEmpty()) {
-            	JOptionPane.showMessageDialog(null, "Numbering in Directory tab is incorrect.", "Error", JOptionPane.ERROR_MESSAGE);
-            	cancelRequested = true;
+            if (cellValue == null) {
+                cellValue = ""; // Replace null with empty string
             }
             columnData.add(cellValue);
         }
@@ -773,10 +865,15 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    	dir_tagstable.clearSelection();
 	        dir_tagstable.getCellEditor().stopCellEditing();
 	    };
+	    if (name_table.isEditing()) {
+	    	name_table.clearSelection();
+	        name_table.getCellEditor().stopCellEditing();
+	    };
 	    
         // Add column-by-column data to the list
-        List<Object> layerData = getColumnData(table_model, 0);
-        List<Object> tagData = getColumnData(table_model, 1);
+        List<Object> layerData = getColumnData(dir_model, 0);
+        List<Object> tagData = getColumnData(dir_model, 1);
+        List<Object> memoData = getColumnData(dir_model, 2);
         if (cancelRequested) {
             return; // Exit loop if cancellation is requested
         }
@@ -788,9 +885,14 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
             return; // Exit loop if cancellation is requested
         }
         
+        List<Object> nameData = getColumnData(name_model, 0);
+        List<Object> NmemoData = getColumnData(name_model, 1);
+        
         // Convert List<Object> to List<String>
         List<String> dir_listItems = convertToStringList(tagData);
-	    List<String> name_listItems = getpathlistItems(name_model);
+        List<String> memo_listItems = convertToStringList(memoData);
+        List<String> name_listItems = convertToStringList(nameData);
+        List<String> Nmemo_listItems = convertToStringList(NmemoData);
 	    
 	    // New list to store paths for classification
 	    List<String> classifyFiles = new ArrayList<>(dicomFilePaths);
@@ -840,7 +942,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        
 	    for (int i = 0; i < totalFiles; i++) {
 	        String filePath = classifyFiles.get(i);            
-	        processDICOMFile(filePath, outputFolderPath, dir_listItems, layerResult, name_listItems, i);
+	        processDICOMFile(filePath, outputFolderPath, dir_listItems, memo_listItems, layerResult, name_listItems, Nmemo_listItems, i);
 	        	        
 	        // Check if the process should be canceled after each iteration
 	        if (cancelRequested) {
@@ -919,7 +1021,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	}
 
 	// Process DICOM File Method
-	private void processDICOMFile(String filePath, String outputFolderPath, List<String> dirTagItems, List<String> layerResult, List<String> nameItems, int i) {
+	private void processDICOMFile(String filePath, String outputFolderPath, List<String> dirTagItems, List<String> dirMemoItems, List<String> layerResult, List<String> nameItems, List<String> NmemoItems, int i) {
 	    String subDir = outputFolderPath;
 	    String fileName = new File(filePath).getName();
 	    // Get file extension from filename
@@ -934,31 +1036,27 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
             }
         }
 
-	    // Define a method to get tag values
-	    List<String> dirtagValues = new ArrayList<>();
-	    for (String diritem : dirTagItems) {
-	        String value = getformatTag(filePath, diritem).toString().replaceAll("[\\\\/:*?\"<>|]", "-").trim();
-	        dirtagValues.add(value);
-	    }
-
 	    // Handle directory name setting button cases
 	    if (name_cb.getSelectedItem().equals("SOP Instance UID")) {
 	        String uid = getformatTag(filePath, "0008,0018").toString();
 	        fileName = uid + fileExtension;
 	    } else if (name_cb.getSelectedItem().equals("Connect Tags")) {
-	        List<String> nametagValues = new ArrayList<>();
-	        for (String nameitem : nameItems) {
-	            String namevalue = getformatTag(filePath, nameitem).toString().replaceAll("[\\r\\n]+", "").replaceAll("[\\\\/:*?\"<>|]", "-").trim();
-	            nametagValues.add(namevalue);
+	    	List<String> nametagValues = new ArrayList<>();
+	        for (int n = 0; n < nameItems.size(); n++) {
+	        	String namevalue = getformatTag(filePath, nameItems.get(n)).toString().replaceAll("[\\r\\n]+", "").replaceAll("[\\\\/:*?\"<>|]", "-").trim();
+	        	String nameMemo = NmemoItems.get(n);
+	            String unitName = namevalue + nameMemo;
+	            nametagValues.add(unitName);
 	        }
 	        fileName = String.join("_", nametagValues) + fileExtension;
 	    }
-
+	    
         // Process two lists simultaneously using indexes
-        for (int d = 0; d < dirtagValues.size(); d++) {
-            String dirTag = dirtagValues.get(d);
+        for (int d = 0; d < dirTagItems.size(); d++) {
+            String dirTag = getformatTag(filePath, dirTagItems.get(d)).toString().replaceAll("[\\r\\n]+", "").replaceAll("[\\\\/:*?\"<>|]", "-").trim();
+            String dirMemo = dirMemoItems.get(d);
             String layer = layerResult.get(d);
-            subDir = subDir + dirTag + layer;
+            subDir = subDir + dirTag + dirMemo + layer;
         }
 
 	    // Check if range filter is enabled
