@@ -1022,7 +1022,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 
 	// Process DICOM File Method
 	private void processDICOMFile(String filePath, String outputFolderPath, List<String> dirTagItems, List<String> dirMemoItems, List<String> layerResult, List<String> nameItems, List<String> NmemoItems, int i) {
-	    String subDir = outputFolderPath;
+	    String subDir = "";
 	    String fileName = new File(filePath).getName();
 	    // Get file extension from filename
         String fileExtension = "";
@@ -1072,12 +1072,11 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 
 	        // Loop through all selected range items
 	        for (int j = 0; j < range_model.size(); j++) {
-	            String rangeDir = range_model.getElementAt(j).replaceAll("[\\\\/:*?\"<>|]", "_"); // Escape special characters
+	            String rangeDir = range_model.getElementAt(j).replaceAll("[\\\\/:*?\"<>|]", "_") + "/"; // Escape special characters
 	            double minValue = Double.parseDouble(rangeDir.split(" ~ ")[0]);
 	            double maxValue = Double.parseDouble(rangeDir.split(" ~ ")[1].split("_")[0]);
 	            double filteredValue = Double.parseDouble(getformatTag(filePath, tagKey));
-	            String subDirWithRange = Paths.get(subDir, rangeDir).toString(); // Append range directory to subDir
-	            File rangeSubDir = new File(subDirWithRange);
+	            File rangeSubDir = new File(outputFolderPath+ rangeDir+ subDir); //Append range directory to subDir
 	            if (!rangeSubDir.exists()) {
 	                rangeSubDir.mkdirs();
 	            }
@@ -1086,16 +1085,15 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	            if (minValue <= filteredValue && filteredValue <= maxValue) {
 	                // Process the file only if it is within the current range
 	                // Create new file path with range sub-directory
-	                Path newfilePath = Paths.get(subDirWithRange, fileName);
+	                Path newfilePath = Paths.get(rangeSubDir.toString(), fileName);
 	                Path orifilePath = Paths.get(filePath);
-
 	                // Handle user choice
 	                handleUserChoice(orifilePath, newfilePath, i);
 	            }
 	        }
 	    } else {
 	        // Create new directory if it doesn't exist
-	        File newDir = new File(subDir);
+	        File newDir = new File(outputFolderPath + subDir);
 	        if (!newDir.exists()) {
 	            newDir.mkdirs();
 	        }
