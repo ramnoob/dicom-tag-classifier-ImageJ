@@ -420,7 +420,11 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		        if (output_t.getText().isEmpty()) {
 		            setStatusText("Output directory is not specified.");
 		            return; // End of process
-		        }
+		        };
+		        if (output_t.getText().equals(input_t.getText())) {
+		        	setStatusText("Input and output folders must be different.");
+		        	return;
+		        };
 		        // From here, call the classifyImages() method and perform other processing
 		        classifyImages();
 		    }
@@ -615,11 +619,10 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
         worker.execute();
     }
     
-
 	public void select_output() {
 		String outputDir = IJ.getDirectory("Output directory");
 		output_t.setText(outputDir);
-	}
+	};
 	
     private boolean isDICOMFile(File file) {
         try (FileInputStream fis = new FileInputStream(file)) {
