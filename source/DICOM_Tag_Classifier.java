@@ -145,7 +145,6 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    }
 	};
     
-	//DefaultListModel<String> name_model = new DefaultListModel<>();
 	DefaultListModel<String> range_model = new DefaultListModel<>();
 	DefaultListModel<String> advanced_model = new DefaultListModel<>();
 	JLabel statusLabel = new JLabel("Ready");
@@ -416,6 +415,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		// Processing when the start_b button is pressed
 		start_b.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
+		    	setProgressValue(0);
 		        // Display a message in the status bar when output_t is unspecified
 		        if (output_t.getText().isEmpty()) {
 		            setStatusText("Output directory is not specified.");
@@ -809,7 +809,6 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        JOptionPane.showMessageDialog(this, "Please enter values for group, element, and value.", "Error", JOptionPane.ERROR_MESSAGE);
 	    }
 	}
-	
 
     // Method to add data in the specified column to the list
     public List<Object> getColumnData(TableModel model, int columnIndex) {
@@ -1048,7 +1047,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        for (int n = 0; n < nameItems.size(); n++) {
 	        	String namevalue = getformatTag(filePath, nameItems.get(n)).toString().replaceAll("[\\r\\n]+", "").replaceAll("[\\\\/:*?\"<>|]", "-").trim();
 	        	String nameMemo = NmemoItems.get(n);
-	            String unitName = namevalue + nameMemo;
+	            String unitName = namevalue + nameMemo.replaceAll("[\\\\/:*?\"<>|]", "-");
 	            nametagValues.add(unitName);
 	        }
 	        fileName = String.join("_", nametagValues) + fileExtension;
@@ -1057,7 +1056,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
         // Process two lists simultaneously using indexes
         for (int d = 0; d < dirTagItems.size(); d++) {
             String dirTag = getformatTag(filePath, dirTagItems.get(d)).toString().replaceAll("[\\r\\n]+", "").replaceAll("[\\\\/:*?\"<>|]", "-").trim();
-            String dirMemo = dirMemoItems.get(d);
+            String dirMemo = dirMemoItems.get(d).replaceAll("[\\\\/:*?\"<>|]", "-");
             String layer = layerResult.get(d);
             subDir = subDir + dirTag + dirMemo + layer;
         }
