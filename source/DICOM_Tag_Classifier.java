@@ -1046,8 +1046,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	    	List<String> nametagValues = new ArrayList<>();
 	        for (int n = 0; n < nameItems.size(); n++) {
 	        	String namevalue = getformatTag(filePath, nameItems.get(n)).toString().replaceAll("[\\r\\n]+", "").replaceAll("[\\\\/:*?\"<>|]", "-").trim();
-	        	String nameMemo = NmemoItems.get(n);
-	            String unitName = namevalue + nameMemo.replaceAll("[\\\\/:*?\"<>|]", "-");
+	            String unitName = namevalue + NmemoItems.get(n).replaceAll("[\\\\/:*?\"<>|]", "-");
 	            nametagValues.add(unitName);
 	        }
 	        fileName = String.join("_", nametagValues) + fileExtension;
