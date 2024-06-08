@@ -459,8 +459,8 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	                if (selectedRow != -1) {
 	                    DefaultTableModel model = (DefaultTableModel) table.getModel();
 	                    // Stop cell editing if it is ongoing
-	            	    if (dir_tagstable.isEditing()) {
-	            	        dir_tagstable.getCellEditor().stopCellEditing();
+	            	    if (table.isEditing()) {
+	            	        table.getCellEditor().stopCellEditing();
 	            	    };
 	                    model.removeRow(selectedRow);
 	                }
