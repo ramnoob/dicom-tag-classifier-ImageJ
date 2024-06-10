@@ -376,7 +376,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 		scroll_range_list.setPreferredSize(new Dimension(190, 140));
 		range_panel.add(scroll_range_list);
 		range_cb.addItem("Off");
-		range_cb.addItem("Image Number");
+		range_cb.addItem("Instance Number");
 		range_cb.addItem("Slice Location");
 		range_cb.setPreferredSize(new Dimension(190, 20));
 		range_panel.add(range_cb);
@@ -966,7 +966,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        
 	        // Set DICOM tag keys according to filter type
 	        String tagKey = null;
-	        if (filterType.equals("Image Number")) {
+	        if (filterType.equals("Instance Number")) {
 	            tagKey = "0020,0013";
 	        } else if (filterType.equals("Slice Location")) {
 	            tagKey = "0020,1041";
@@ -1065,7 +1065,7 @@ public class DICOM_Tag_Classifier extends PlugInFrame {
 	        Object filterType = range_cb.getSelectedItem();
 	        // Set DICOM tag key based on filter type
 	        String tagKey = null;
-	        if (filterType.equals("Image Number")) {
+	        if (filterType.equals("Instance Number")) {
 	            tagKey = "0020,0013";
 	        } else if (filterType.equals("Slice Location")) {
 	            tagKey = "0020,1041";
