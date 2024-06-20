@@ -1,4 +1,4 @@
-# [DICOM Tag Classifier ImageJ](https://github.com/ramnoob/dicom-tag-classifier-ImageJ)
+# DICOM Tag Classifier ImageJ
 
 ## Overview
 DICOM Tag Classifier is a plugin created in Java code that provides a convenient way to classify DICOM (Digital Imaging and Communications in Medicine) files directly within the ImageJ environment. The plugin allows users to create a directory structure based on DICOM tag values and organize DICOM files into specified directories.  
