@@ -17,7 +17,7 @@ DICOM Tag Classifier is a plugin created in Java code that provides a convenient
 3. **Activate Plugin**: Navigate to the "Plugins" menu in ImageJ and select "DICOM Tag Classifier" to activate the plugin.
 4. **Configure**: Use the plug-in interface to configure classification settings such as directory structure, filtering criteria, etc.
 
-  <img width="1665" alt="eng" src="https://github.com/ramnoob/dicom-tag-classifier-ImageJ/assets/70456441/b85d3564-23f9-48b0-a580-ab45b219d99b">
+  <img width="1665" alt="eng" src="https://github.com/ramnoob/dicom-tag-classifier-ImageJ/assets/70456441/d9486ff1-e26c-4c71-bafb-03d3268fc513">
   
 5. **Classify**: Start the classification process from the plugin interface to organize DICOM files into the specified directories.
 6. **Monitor**: Monitor the progress of the classification process and view any error or warning messages within ImageJ.
