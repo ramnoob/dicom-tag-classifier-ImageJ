@@ -15,8 +15,8 @@ DICOM Tag Classifier は、DICOM（Digital Imaging and Communications in Medicin
 1. **インストール**: `DICOM_Tag_Classifier-X.X.X.jar`ファイルをダウンロードし、ImageJの `plugins` ディレクトリに置く。以前のバージョンがある場合は削除してください。  
 2. **ImageJの起動**: プラグインを読み込むために、ImageJを開くか、すでに起動している場合は再起動する。
 3. **プラグインの有効化**: ImageJ の "Plugins "メニューに移動し、"DICOM Tag Classifier "を選択してプラグインを起動する。
-4. **設定**: プラグインのインターフェイスを使用して、ディレクトリ構造やフィルタリング条件などの分類設定を行う。
-5. **分類**: プラグインインターフェースから分類プロセスを開始し、DICOMファイルを指定されたディレクトリに整理する。
+4. **設定**: プラグインを使用して、ディレクトリ構造やフィルタリング条件などの分類設定を行う。
+5. **分類**: Startボタンから分類を開始し、DICOMファイルを指定されたディレクトリに整理する。
 6. **モニタリング**: 分類プロセスの進行状況を監視し、ImageJ 内でエラーまたは警告メッセージを表示する。
 ![DICOM Tag Classifier Configuration](https://github.com/ramnoob/dicom-tag-classifier-ImageJ/assets/70456441/6f23c20a-35c6-4617-b799-33b00c4323a2)
 
